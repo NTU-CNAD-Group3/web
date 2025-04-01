@@ -28,7 +28,7 @@ export function Navbar() {
         {/* Left: Logo */}
         <div className="flex w-1/4 items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/icon.png" alt="LoginHub" className="h-8 w-8" />
+            <img src="/icon.png" alt="DataHub" className="h-8 w-8" />
             <span className="hidden text-lg font-semibold text-accent-foreground sm:block">DataHub</span>
           </Link>
         </div>
@@ -61,7 +61,7 @@ export function Navbar() {
         {/* Right: GitHub & Theme */}
         <div className="flex w-1/4 items-center justify-end space-x-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="https://github.com/RulerChen/LoginHub" target="_blank" rel="noreferrer">
+            <Link to="https://github.com/NTU-CNAD-Group3" target="_blank" rel="noreferrer">
               <Github className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
             </Link>

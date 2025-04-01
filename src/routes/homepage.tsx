@@ -25,7 +25,7 @@ export default function HomePage() {
               variant="outline"
               className="border-gray-200 bg-transparent text-gray-900 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
             >
-              <Link to="https://github.com/RulerChen/LoginHub" className="flex items-center">
+              <Link to="https://github.com/NTU-CNAD-Group3" className="flex items-center">
                 <Github className="mr-2 h-5 w-5" />
                 GitHub
               </Link>

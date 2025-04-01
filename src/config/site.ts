@@ -14,6 +14,6 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: 'https://github.com/RulerChen/LoginHub',
+    github: 'https://github.com/NTU-CNAD-Group3',
   },
 };
