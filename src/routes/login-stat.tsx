@@ -2,7 +2,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { StatCard } from '@/components/stat-card';
+// import { StatCard } from '@/components/stat-card';
 
 export default function LoginStat() {
   return (
@@ -21,7 +21,7 @@ export default function LoginStat() {
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div className="flex-1 overflow-auto p-4">
+          {/* <div className="flex-1 overflow-auto p-4">
             <div className="flex flex-col gap-4">
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
                 <StatCard title="Registed Days" value="150" />
@@ -30,7 +30,7 @@ export default function LoginStat() {
               </div>
               <div className="flex-1 rounded-xl bg-primary-foreground p-4"></div>
             </div>
-          </div>
+          </div> */}
         </SidebarInset>
       </SidebarProvider>
     </div>
