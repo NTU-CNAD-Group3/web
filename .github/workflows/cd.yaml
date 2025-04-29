@@ -37,5 +37,5 @@ jobs:
       - name: Upload dist to GCS
         uses: google-github-actions/upload-cloud-storage@v2
         with:
-          path: 'dist/**'
+          path: 'dist'
           destination: '${{ secrets.BUCKET_NAME }}'
