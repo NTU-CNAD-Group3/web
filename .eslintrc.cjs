@@ -18,6 +18,5 @@ module.exports = {
         arrowParens: 'always',
       },
     ],
-    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
   },
 };

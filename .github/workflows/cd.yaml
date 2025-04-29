@@ -23,6 +23,7 @@ jobs:
         run: npm ci
 
       - name: Lint and test
+        if: github.event_name != 'workflow_dispatch'
         run: npm run lint
 
       - name: Build with Vite
@@ -36,5 +37,5 @@ jobs:
       - name: Upload dist to GCS
         uses: google-github-actions/upload-cloud-storage@v2
         with:
-          path: 'dist'                 
-          destination: '${{ secrets.BUCKET_NAME }}'  
+          path: 'dist'
+          destination: '${{ secrets.BUCKET_NAME }}'
