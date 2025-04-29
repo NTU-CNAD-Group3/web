@@ -34,8 +34,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: Upload dist to GCS
-        uses: google-github-actions/upload-cloud-storage@v2
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          path: 'dist'
-          destination: '${{ secrets.BUCKET_NAME }}'
+          project_id: 'cnad-group-3'
+
+      - name: Upload via gcloud
+        run: |
+          gcloud storage cp --recursive dist/* gs://${{ secrets.BUCKET_NAME }}
