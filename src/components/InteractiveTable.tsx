@@ -178,7 +178,7 @@ function InteractiveTable() {
   const hasSelectedItems = Object.values(selectedItems).some((value) => value)
 
   return (
-    <div className="container ml-4 mr-4 mx-aut0 py-10">
+    <div className="container ml-4 mr-4 mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Task Management</h1>
         <div className="flex gap-2">
