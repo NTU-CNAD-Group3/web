@@ -2,7 +2,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import InteractiveTable  from '@/components/InteractiveTable'; 
+import InteractiveTable from '@/components/InteractiveTable';
 // import { StatCard } from '@/components/stat-card';
 
 export default function LoginStat() {
