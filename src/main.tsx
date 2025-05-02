@@ -15,7 +15,6 @@ import ForgetPasswordConfirm from '@/routes/forget-password-confirm';
 import ChangePasswordConfirm from '@/routes/change-password-confirm';
 import LoginStat from '@/routes/login-stat';
 import Layout from '@/layout';
-import InteractiveTable from './components/InteractiveTable';
 
 import './index.css';
 
