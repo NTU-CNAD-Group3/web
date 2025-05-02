@@ -1,6 +1,6 @@
 # Web
 
-This repo contains the web application for the cnad final project. 
+This repo contains the web application for the cnad final project.
 
 It is built using following tech stack:
 
