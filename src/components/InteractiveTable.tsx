@@ -1,18 +1,23 @@
 'use client';
 
 import type React from 'react';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-// Sample data structure
 interface Item {
   id: string;
   name: string;
@@ -21,75 +26,61 @@ interface Item {
   description: string;
 }
 
-// Empty item template for new items
-const emptyItem: Item = {
-  id: '',
-  name: '',
-  time: '',
-  inCharge: '',
-  description: '',
-};
+// Original task data
+const sampleItems: Item[] = [
+  {
+    id: '001',
+    name: 'Project Alpha',
+    time: '2023-05-15',
+    inCharge: 'John Doe',
+    description:
+      'This is a critical project focused on improving user experience across our platform. It involves redesigning the dashboard and optimizing performance.',
+  },
+  {
+    id: '002',
+    name: 'Feature Beta',
+    time: '2023-06-20',
+    inCharge: 'Jane Smith',
+    description:
+      'Implementing new analytics features to provide better insights for our customers. This includes custom reports and real-time data visualization.',
+  },
+  {
+    id: '003',
+    name: 'Maintenance Task',
+    time: '2023-07-10',
+    inCharge: 'Mike Johnson',
+    description:
+      'Regular system maintenance to ensure optimal performance. This includes database optimization, security updates, and bug fixes.',
+  },
+];
+
+type OperationType = 'dc' | 'room' | 'rack';
+
+interface Rack {
+  rackName: string;
+  serviceName: string;
+  height: string;
+}
 
 function InteractiveTable() {
-  // Initial data
-  const [items, setItems] = useState<Item[]>([
-    {
-      id: '001',
-      name: 'Project Alpha',
-      time: '2023-05-15',
-      inCharge: 'John Doe',
-      description:
-        'This is a critical project focused on improving user experience across our platform. It involves redesigning the dashboard and optimizing performance.',
-    },
-    {
-      id: '002',
-      name: 'Feature Beta',
-      time: '2023-06-20',
-      inCharge: 'Jane Smith',
-      description:
-        'Implementing new analytics features to provide better insights for our customers. This includes custom reports and real-time data visualization.',
-    },
-    {
-      id: '003',
-      name: 'Maintenance Task',
-      time: '2023-07-10',
-      inCharge: 'Mike Johnson',
-      description:
-        'Regular system maintenance to ensure optimal performance. This includes database optimization, security updates, and bug fixes.',
-    },
-    {
-      id: '004',
-      name: 'Client Meeting',
-      time: '2023-07-15',
-      inCharge: 'Sarah Williams',
-      description: 'Meeting with key stakeholders to discuss project progress and gather feedback on recent feature implementations.',
-    },
-    {
-      id: '005',
-      name: 'Product Launch',
-      time: '2023-08-01',
-      inCharge: 'Robert Chen',
-      description:
-        'Coordinating the launch of our new product line. This includes marketing coordination, technical preparation, and customer support readiness.',
-    },
-  ]);
-
-  // State for selected items (checkboxes)
+  // Original task data
+  const [items, setItems] = useState<Item[]>(sampleItems);
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
-
-  // State for the currently viewed item details
   const [viewedItem, setViewedItem] = useState<Item | null>(null);
-
-  // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
 
-  // State for add mode
   const [isAdding, setIsAdding] = useState(false);
 
-  // State for form data
-  const [formData, setFormData] = useState<Item>(emptyItem);
+  // add operation 
+  const [operationType, setOperationType] = useState<OperationType>('dc');
+  const [dcName, setDcName] = useState('');
+  const [roomCount, setRoomCount] = useState<number>(0);
+  const [roomNames, setRoomNames] = useState<string[]>([]);
+  const [roomName, setRoomName] = useState('');
+  const [rackCount, setRackCount] = useState<number>(0);
+  const [racks, setRacks] = useState<Rack[]>([]);
 
-  // Handle checkbox change
+  // Handle checkbox change for existing table items
   const handleCheckboxChange = (id: string) => {
     setSelectedItems((prev) => ({
       ...prev,
@@ -97,93 +88,116 @@ function InteractiveTable() {
     }));
   };
 
-  // Handle row click to view details
   const handleRowClick = (item: Item) => {
-    if (isEditing || isAdding) return; // Prevent changing selection while editing
+    if (isEditing || isAdding) return;
     setViewedItem(item);
   };
 
-  // Delete selected items
   const handleDelete = () => {
     const newItems = items.filter((item) => !selectedItems[item.id]);
     setItems(newItems);
     setSelectedItems({});
-
-    // If we're viewing an item that's being deleted, clear the view
     if (viewedItem && selectedItems[viewedItem.id]) {
       setViewedItem(null);
     }
   };
 
-  // Start editing an item
   const handleEdit = () => {
     if (viewedItem) {
-      setFormData({ ...viewedItem });
       setIsEditing(true);
     }
   };
 
-  // Start adding a new item
+  // open add operation form and set default values
   const handleAdd = () => {
-    setFormData({ ...emptyItem, id: generateId() });
+    setOperationType('dc');
+    setDcName('');
+    setRoomCount(0);
+    setRoomNames([]);
+    setRoomName('');
+    setRackCount(0);
+    setRacks([]);
     setIsAdding(true);
     setViewedItem(null);
   };
 
-  // Generate a unique ID for new items
-  const generateId = () => {
-    const existingIds = items.map((item) => Number.parseInt(item.id));
-    const maxId = Math.max(...existingIds, 0);
-    return String(maxId + 1).padStart(3, '0');
+  const handleRoomNameChange = (index: number, value: string) => {
+    const newRoomNames = [...roomNames];
+    newRoomNames[index] = value;
+    setRoomNames(newRoomNames);
   };
 
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleRackChange = (index: number, field: keyof Rack, value: string) => {
+    const newRacks = [...racks];
+    newRacks[index] = {
+      ...newRacks[index],
+      [field]: value,
+    };
+    setRacks(newRacks);
   };
 
-  // Save edited item
+  useEffect(() => {
+    if (operationType === 'room') {
+      setRoomNames(Array(roomCount).fill(''));
+    }
+  }, [roomCount, operationType]);
+
+  useEffect(() => {
+    if (operationType === 'rack') {
+      setRacks(Array(rackCount).fill({ racktName: '', serviceName: '', height: '' }));
+    }
+  }, [rackCount, operationType]);
+
+  // simulate save operation
   const handleSave = () => {
-    // Validate form data
-    if (!formData.name || !formData.time || !formData.inCharge) {
-      alert('Please fill in all required fields');
-      return;
-    }
+    if (operationType === 'dc') {
+      if (!dcName) {
+        alert('Please fill in DC Name');
+        return;
+      }
+      // simulate API call for DC creation
+      setTimeout(() => {
+        alert(`DC created successfully! New DC ID: ${Math.floor(Math.random() * 1000)}`);
+        setIsAdding(false);
+      }, 500);
+    } else if (operationType === 'room') {
+      if (!dcName || roomCount <= 0 || roomNames.some((name) => !name)) {
+        alert('Please fill in all required fields for Room creation');
+        return;
+      }
+      // simulate API call for Room creation
+      setTimeout(() => {
+        alert(`Room(s) created successfully for DC "${dcName}"!`);
+        setIsAdding(false);
+      }, 500);
+    } else if (operationType === 'rack') {
+      if (!dcName || !roomName || rackCount <= 0 || racks.some(rac => !rac.rackName || !rac.serviceName || !rac.height)) {
+        alert('Please fill in all required fields for Rack creation');
+        return;
+      }
 
-    if (isEditing) {
-      // Update existing item
-      setItems(items.map((item) => (item.id === formData.id ? formData : item)));
-      setViewedItem(formData);
-      setIsEditing(false);
-    } else if (isAdding) {
-      // Add new item
-      setItems([...items, formData]);
-      setViewedItem(formData);
-      setIsAdding(false);
+      setTimeout(() => {
+        alert(`Rack(s) created successfully in Room "${roomName}" for DC "${dcName}"!`);
+        setIsAdding(false);
+      }, 500);
     }
   };
 
-  // Cancel editing or adding
   const handleCancel = () => {
     setIsEditing(false);
     setIsAdding(false);
   };
 
-  // Check if any items are selected
-  const hasSelectedItems = Object.values(selectedItems).some((value) => value);
+  const hasSelectedItems = Object.values(selectedItems).some((v) => v);
 
   return (
     <div className="container mx-auto ml-4 mr-4 py-10">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Task Management</h1>
+        <h1 className="text-2xl font-bold">Operation Management</h1>
         <div className="flex gap-2">
           <Button onClick={handleAdd} className="flex items-center gap-2" size="lg" variant="default">
             <Plus className="h-5 w-5" />
-            Add Item
+            Create Operation
           </Button>
           {hasSelectedItems && (
             <Button variant="destructive" onClick={handleDelete} className="flex items-center gap-2">
@@ -209,9 +223,16 @@ function InteractiveTable() {
               </TableHeader>
               <TableBody>
                 {items.map((item) => (
-                  <TableRow key={item.id} onClick={() => handleRowClick(item)} className="cursor-pointer hover:bg-muted/50">
+                  <TableRow
+                    key={item.id}
+                    onClick={() => handleRowClick(item)}
+                    className="cursor-pointer hover:bg-muted/50"
+                  >
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox checked={!!selectedItems[item.id]} onCheckedChange={() => handleCheckboxChange(item.id)} />
+                      <Checkbox
+                        checked={!!selectedItems[item.id]}
+                        onCheckedChange={() => handleCheckboxChange(item.id)}
+                      />
                     </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.id}</TableCell>
@@ -225,58 +246,137 @@ function InteractiveTable() {
         </div>
 
         <div className="md:col-span-1">
-          {isEditing || isAdding ? (
+          {isAdding ? (
             <Card>
               <CardHeader>
-                <CardTitle>{isAdding ? 'Add New Item' : 'Edit Item'}</CardTitle>
-                <CardDescription>{isAdding ? 'Create a new task' : 'Update task details'}</CardDescription>
+                <CardTitle>Create Operation</CardTitle>
+                <CardDescription>
+                  Fill in the details and press Save.
+                </CardDescription>
               </CardHeader>
               <CardContent className="max-h-[300px] overflow-y-auto pr-1">
                 <form className="space-y-4 pb-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name *</Label>
-                    <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Task name" required />
+                    <Label htmlFor="operationType">Operation Type</Label>
+                    <select
+                      id="operationType"
+                      title="Operation Type"
+                      value={operationType}
+                      onChange={(e) => setOperationType(e.target.value as OperationType)}
+                      className="border rounded p-1"
+                    >
+                      <option value="dc">Create DC</option>
+                      <option value="room">Create Room</option>
+                      <option value="rack">Create rack</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="id">ID</Label>
+                    <Label htmlFor="dcName">DC Name *</Label>
                     <Input
-                      id="id"
-                      name="id"
-                      value={formData.id}
-                      onChange={handleInputChange}
-                      disabled={true} // ID is auto-generated or fixed
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="time">Date *</Label>
-                    <Input id="time" name="time" type="date" value={formData.time} onChange={handleInputChange} required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="inCharge">In Charge *</Label>
-                    <Input
-                      id="inCharge"
-                      name="inCharge"
-                      value={formData.inCharge}
-                      onChange={handleInputChange}
-                      placeholder="Person responsible"
+                      id="dcName"
+                      name="dcName"
+                      value={dcName}
+                      onChange={(e) => setDcName(e.target.value)}
+                      placeholder="Enter DC Name"
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Task description"
-                      rows={4}
-                    />
-                  </div>
+                  {operationType === 'room' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="roomCount">Number of Rooms *</Label>
+                        <Input
+                          id="roomCount"
+                          name="roomCount"
+                          type="number"
+                          min="0"
+                          value={roomCount}
+                          onChange={(e) => setRoomCount(Number(e.target.value))}
+                          required
+                        />
+                      </div>
+                      {roomNames.map((room, index) => (
+                        <div key={index} className="space-y-2">
+                          <Label htmlFor={`roomName-${index}`}>Room {index + 1} Name *</Label>
+                          <Input
+                            id={`roomName-${index}`}
+                            name={`roomName-${index}`}
+                            value={room}
+                            onChange={(e) => handleRoomNameChange(index, e.target.value)}
+                            placeholder="Enter Room Name"
+                            required
+                          />
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {operationType === 'rack' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="roomName">Room Name *</Label>
+                        <Input
+                          id="roomName"
+                          name="roomName"
+                          value={roomName}
+                          onChange={(e) => setRoomName(e.target.value)}
+                          placeholder="Enter Room Name"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="rackCount">Number of Racks *</Label>
+                        <Input
+                          id="rackCount"
+                          name="rackCount"
+                          type="number"
+                          min="0"
+                          value={rackCount}
+                          onChange={(e) => setRackCount(Number(e.target.value))}
+                          required
+                        />
+                      </div>
+                      {racks.map((rac, index) => (
+                        <div key={index} className="border p-2 rounded space-y-2">
+                          <div className="space-y-2">
+                            <Label htmlFor={`rackName-${index}`}>Rack {index + 1} Name *</Label>
+                            <Input
+                              id={`rackName-${index}`}
+                              name={`rackName-${index}`}
+                              value={rac.rackName}
+                              onChange={(e) => handleRackChange(index, 'rackName', e.target.value)}
+                              placeholder="Enter Rack Name"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`serviceName-${index}`}>Service Name *</Label>
+                            <Input
+                              id={`serviceName-${index}`}
+                              name={`serviceName-${index}`}
+                              value={rac.serviceName}
+                              onChange={(e) => handleRackChange(index, 'serviceName', e.target.value)}
+                              placeholder="Enter Service Name"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`height-${index}`}>Height (unit) *</Label>
+                            <Input
+                              id={`height-${index}`}
+                              name={`height-${index}`}
+                              value={rac.height}
+                              onChange={(e) => handleRackChange(index, 'height', e.target.value)}
+                              placeholder="Enter Height"
+                              required
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </form>
               </CardContent>
               <CardFooter className="flex justify-between">
