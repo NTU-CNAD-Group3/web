@@ -5,14 +5,7 @@ import { useState, useEffect } from 'react';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,7 +63,7 @@ function InteractiveTable() {
 
   const [isAdding, setIsAdding] = useState(false);
 
-  // add operation 
+  // add operation
   const [operationType, setOperationType] = useState<OperationType>('dc');
   const [dcName, setDcName] = useState('');
   const [roomCount, setRoomCount] = useState<number>(0);
@@ -170,7 +163,7 @@ function InteractiveTable() {
         setIsAdding(false);
       }, 500);
     } else if (operationType === 'rack') {
-      if (!dcName || !roomName || rackCount <= 0 || racks.some(rac => !rac.rackName || !rac.serviceName || !rac.height)) {
+      if (!dcName || !roomName || rackCount <= 0 || racks.some((rac) => !rac.rackName || !rac.serviceName || !rac.height)) {
         alert('Please fill in all required fields for Rack creation');
         return;
       }
@@ -222,16 +215,9 @@ function InteractiveTable() {
               </TableHeader>
               <TableBody>
                 {items.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    onClick={() => handleRowClick(item)}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
+                  <TableRow key={item.id} onClick={() => handleRowClick(item)} className="cursor-pointer hover:bg-muted/50">
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={!!selectedItems[item.id]}
-                        onCheckedChange={() => handleCheckboxChange(item.id)}
-                      />
+                      <Checkbox checked={!!selectedItems[item.id]} onCheckedChange={() => handleCheckboxChange(item.id)} />
                     </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.id}</TableCell>
@@ -249,9 +235,7 @@ function InteractiveTable() {
             <Card>
               <CardHeader>
                 <CardTitle>Create Operation</CardTitle>
-                <CardDescription>
-                  Fill in the details and press Save.
-                </CardDescription>
+                <CardDescription>Fill in the details and press Save.</CardDescription>
               </CardHeader>
               <CardContent className="max-h-[300px] overflow-y-auto pr-1">
                 <form className="space-y-4 pb-2">
@@ -262,7 +246,7 @@ function InteractiveTable() {
                       title="Operation Type"
                       value={operationType}
                       onChange={(e) => setOperationType(e.target.value as OperationType)}
-                      className="border rounded p-1"
+                      className="rounded border p-1"
                     >
                       <option value="dc">Create DC</option>
                       <option value="room">Create Room</option>
@@ -338,7 +322,7 @@ function InteractiveTable() {
                         />
                       </div>
                       {racks.map((rac, index) => (
-                        <div key={index} className="border p-2 rounded space-y-2">
+                        <div key={index} className="space-y-2 rounded border p-2">
                           <div className="space-y-2">
                             <Label htmlFor={`rackName-${index}`}>Rack {index + 1} Name *</Label>
                             <Input
