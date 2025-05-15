@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/external-ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/external-ui/tabs"
-import { ServerMetrics } from "@/components/server-metrics"
-import { ServerList } from "@/components/server-list"
-import { AlertsList } from "@/components/alerts-list"
-import { ResourceUtilization } from "@/components/resource-utilization"
-import { DataCenterOverview } from "@/components/datacenter-overview"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/external-ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/external-ui/tabs';
+import { ServerMetrics } from '@/components/server-metrics';
+import { ServerList } from '@/components/server-list';
+import { AlertsList } from '@/components/alerts-list';
+import { ResourceUtilization } from '@/components/resource-utilization';
+import { DataCenterOverview } from '@/components/datacenter-overview';
 
 export function DashboardOverview() {
   return (
@@ -169,5 +169,5 @@ export function DashboardOverview() {
         </Card>
       </TabsContent>
     </Tabs>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { AlertCircle, CheckCircle2, MoreHorizontal, Plus, Power, Server, Thermometer, WrenchIcon } from "lucide-react"
-import { Badge } from "@/components/external-ui/badge"
-import { Button } from "@/components/external-ui/button"
-import { Progress } from "@/components/external-ui/progress"
+import { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle2, MoreHorizontal, Plus, Power, Server, Thermometer, WrenchIcon } from 'lucide-react';
+import { Badge } from '@/components/external-ui/badge';
+import { Button } from '@/components/external-ui/button';
+import { Progress } from '@/components/external-ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +12,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/external-ui/accordion"
-import { RackEditDialog } from "@/components/rack-edit-dialog"
-import { ServerConfigDialog } from "@/components/server-config-dialog"
-import { useToast } from "@/hooks/use-toast"
+} from '@/components/external-ui/dropdown-menu';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/external-ui/accordion';
+import { RackEditDialog } from '@/components/rack-edit-dialog';
+import { ServerConfigDialog } from '@/components/server-config-dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,172 +27,176 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/external-ui/alert-dialog"
+} from '@/components/external-ui/alert-dialog';
 
 // 模擬數據 - 機架詳情
 const racksData = {
-  "a-01": {
-    id: "a-01",
-    name: "A-01",
-    location: "A 排",
-    status: "online",
-    model: "Dell PowerEdge 42U",
-    capacity: "42U",
-    usedCapacity: "36U",
+  'a-01': {
+    id: 'a-01',
+    name: 'A-01',
+    location: 'A 排',
+    status: 'online',
+    model: 'Dell PowerEdge 42U',
+    capacity: '42U',
+    usedCapacity: '36U',
     power: {
-      capacity: "5.0 kW",
-      usage: "3.2 kW",
+      capacity: '5.0 kW',
+      usage: '3.2 kW',
       usagePercent: 64,
     },
-    temperature: "24°C",
-    humidity: "45%",
+    temperature: '24°C',
+    humidity: '45%',
     servers: [
-      { id: "srv-001", name: "WEB-SRV-01", status: "online", model: "Dell R740", u: 2, position: 36 },
-      { id: "srv-002", name: "WEB-SRV-02", status: "online", model: "Dell R740", u: 2, position: 34 },
-      { id: "srv-003", name: "APP-SRV-01", status: "online", model: "Dell R740", u: 2, position: 32 },
-      { id: "srv-004", name: "APP-SRV-02", status: "online", model: "Dell R740", u: 2, position: 30 },
-      { id: "srv-005", name: "DB-SRV-01", status: "online", model: "Dell R740", u: 2, position: 28 },
-      { id: "srv-006", name: "DB-SRV-02", status: "online", model: "Dell R740", u: 2, position: 26 },
-      { id: "srv-007", name: "STORAGE-01", status: "online", model: "Dell R740", u: 4, position: 22 },
-      { id: "srv-008", name: "BACKUP-01", status: "online", model: "Dell R740", u: 2, position: 20 },
-      { id: "srv-009", name: "NETWORK-01", status: "online", model: "Cisco UCS", u: 1, position: 19 },
-      { id: "srv-010", name: "NETWORK-02", status: "online", model: "Cisco UCS", u: 1, position: 18 },
-      { id: "srv-011", name: "NETWORK-03", status: "online", model: "Cisco UCS", u: 1, position: 17 },
-      { id: "srv-012", name: "NETWORK-04", status: "online", model: "Cisco UCS", u: 1, position: 16 },
+      { id: 'srv-001', name: 'WEB-SRV-01', status: 'online', model: 'Dell R740', u: 2, position: 36 },
+      { id: 'srv-002', name: 'WEB-SRV-02', status: 'online', model: 'Dell R740', u: 2, position: 34 },
+      { id: 'srv-003', name: 'APP-SRV-01', status: 'online', model: 'Dell R740', u: 2, position: 32 },
+      { id: 'srv-004', name: 'APP-SRV-02', status: 'online', model: 'Dell R740', u: 2, position: 30 },
+      { id: 'srv-005', name: 'DB-SRV-01', status: 'online', model: 'Dell R740', u: 2, position: 28 },
+      { id: 'srv-006', name: 'DB-SRV-02', status: 'online', model: 'Dell R740', u: 2, position: 26 },
+      { id: 'srv-007', name: 'STORAGE-01', status: 'online', model: 'Dell R740', u: 4, position: 22 },
+      { id: 'srv-008', name: 'BACKUP-01', status: 'online', model: 'Dell R740', u: 2, position: 20 },
+      { id: 'srv-009', name: 'NETWORK-01', status: 'online', model: 'Cisco UCS', u: 1, position: 19 },
+      { id: 'srv-010', name: 'NETWORK-02', status: 'online', model: 'Cisco UCS', u: 1, position: 18 },
+      { id: 'srv-011', name: 'NETWORK-03', status: 'online', model: 'Cisco UCS', u: 1, position: 17 },
+      { id: 'srv-012', name: 'NETWORK-04', status: 'online', model: 'Cisco UCS', u: 1, position: 16 },
     ],
   },
-  "a-03": {
-    id: "a-03",
-    name: "A-03",
-    location: "A 排",
-    status: "maintenance",
-    model: "Dell PowerEdge 42U",
-    capacity: "42U",
-    usedCapacity: "12U",
+  'a-03': {
+    id: 'a-03',
+    name: 'A-03',
+    location: 'A 排',
+    status: 'maintenance',
+    model: 'Dell PowerEdge 42U',
+    capacity: '42U',
+    usedCapacity: '12U',
     power: {
-      capacity: "5.0 kW",
-      usage: "1.5 kW",
+      capacity: '5.0 kW',
+      usage: '1.5 kW',
       usagePercent: 30,
     },
-    temperature: "22°C",
-    humidity: "40%",
+    temperature: '22°C',
+    humidity: '40%',
     servers: [
-      { id: "srv-101", name: "TEST-SRV-01", status: "maintenance", model: "Dell R740", u: 2, position: 40 },
-      { id: "srv-102", name: "TEST-SRV-02", status: "maintenance", model: "Dell R740", u: 2, position: 38 },
-      { id: "srv-103", name: "TEST-SRV-03", status: "online", model: "Dell R740", u: 2, position: 36 },
-      { id: "srv-104", name: "TEST-SRV-04", status: "online", model: "Dell R740", u: 2, position: 34 },
+      { id: 'srv-101', name: 'TEST-SRV-01', status: 'maintenance', model: 'Dell R740', u: 2, position: 40 },
+      { id: 'srv-102', name: 'TEST-SRV-02', status: 'maintenance', model: 'Dell R740', u: 2, position: 38 },
+      { id: 'srv-103', name: 'TEST-SRV-03', status: 'online', model: 'Dell R740', u: 2, position: 36 },
+      { id: 'srv-104', name: 'TEST-SRV-04', status: 'online', model: 'Dell R740', u: 2, position: 34 },
     ],
   },
-  "b-02": {
-    id: "b-02",
-    name: "B-02",
-    location: "B 排",
-    status: "offline",
-    model: "Dell PowerEdge 42U",
-    capacity: "42U",
-    usedCapacity: "0U",
+  'b-02': {
+    id: 'b-02',
+    name: 'B-02',
+    location: 'B 排',
+    status: 'offline',
+    model: 'Dell PowerEdge 42U',
+    capacity: '42U',
+    usedCapacity: '0U',
     power: {
-      capacity: "5.0 kW",
-      usage: "0 kW",
+      capacity: '5.0 kW',
+      usage: '0 kW',
       usagePercent: 0,
     },
-    temperature: "21°C",
-    humidity: "40%",
+    temperature: '21°C',
+    humidity: '40%',
     servers: [],
   },
-}
+};
 
 interface RackDetailsProps {
-  rackId?: string
+  rackId?: string;
 }
 
-export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
-  const [rackData, setRackData] = useState<any>(null)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const { toast } = useToast()
+export function RackDetails({ rackId = 'a-01' }: RackDetailsProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [rackData, setRackData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
 
   useEffect(() => {
     // 在實際應用中，這裡會從API獲取數據
-    setRackData(racksData[rackId as keyof typeof racksData] || racksData["a-01"])
-  }, [rackId, refreshKey])
+    setRackData(racksData[rackId as keyof typeof racksData] || racksData['a-01']);
+  }, [rackId, refreshKey]);
 
   if (!rackData) {
-    return <div>加載中...</div>
+    return <div>加載中...</div>;
   }
 
   const handleRackUpdate = () => {
     toast({
-      title: "機架信息已更新",
+      title: '機架信息已更新',
       description: `機架 ${rackData.name} 的信息已成功更新。`,
-    })
-    setRefreshKey((prev) => prev + 1)
-  }
+    });
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const handleServerUpdate = () => {
     toast({
-      title: "服務器已添加",
-      description: "新服務器已成功添加到機架。",
-    })
-    setRefreshKey((prev) => prev + 1)
-  }
+      title: '服務器已添加',
+      description: '新服務器已成功添加到機架。',
+    });
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const handleServerRemove = (serverId: string) => {
     toast({
-      title: "服務器已移除",
-      description: "服務器已從機架中移除。",
-    })
+      title: '服務器已移除',
+      description: '服務器已從機架中移除。',
+    });
     // 在實際應用中，這裡會調用API刪除服務器
     // 模擬刪除服務器
-    const updatedServers = rackData.servers.filter((server: any) => server.id !== serverId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedServers = rackData.servers.filter((server: any) => server.id !== serverId);
     setRackData({
       ...rackData,
       servers: updatedServers,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       usedCapacity: `${updatedServers.reduce((acc: number, server: any) => acc + server.u, 0)}U`,
-    })
-  }
+    });
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "online":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case "offline":
-        return <AlertCircle className="h-5 w-5 text-red-500" />
-      case "maintenance":
-        return <WrenchIcon className="h-5 w-5 text-yellow-500" />
+      case 'online':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'offline':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      case 'maintenance':
+        return <WrenchIcon className="h-5 w-5 text-yellow-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusText = (status: string) => {
     switch (status) {
-      case "online":
-        return "在線"
-      case "offline":
-        return "離線"
-      case "maintenance":
-        return "維護中"
+      case 'online':
+        return '在線';
+      case 'offline':
+        return '離線';
+      case 'maintenance':
+        return '維護中';
       default:
-        return "未知"
+        return '未知';
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "online":
-        return <Badge className="bg-green-500">在線</Badge>
-      case "offline":
-        return <Badge variant="destructive">離線</Badge>
-      case "maintenance":
+      case 'online':
+        return <Badge className="bg-green-500">在線</Badge>;
+      case 'offline':
+        return <Badge variant="destructive">離線</Badge>;
+      case 'maintenance':
         return (
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             維護中
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">未知</Badge>
+        return <Badge variant="outline">未知</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -216,7 +220,7 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <div className="text-sm text-muted-foreground">位置</div>
           <div>{rackData.location}</div>
@@ -245,10 +249,7 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
           </div>
         </div>
 
-        <Progress
-          value={(Number.parseInt(rackData.usedCapacity) / Number.parseInt(rackData.capacity)) * 100}
-          className="h-2"
-        />
+        <Progress value={(Number.parseInt(rackData.usedCapacity) / Number.parseInt(rackData.capacity)) * 100} className="h-2" />
       </div>
 
       <div className="space-y-2">
@@ -262,15 +263,15 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex items-center space-x-2 p-3 border rounded-md">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex items-center space-x-2 rounded-md border p-3">
           <Thermometer className="h-5 w-5 text-orange-500" />
           <div>
             <div className="text-sm font-medium">溫度</div>
             <div>{rackData.temperature}</div>
           </div>
         </div>
-        <div className="flex items-center space-x-2 p-3 border rounded-md">
+        <div className="flex items-center space-x-2 rounded-md border p-3">
           <Server className="h-5 w-5 text-blue-500" />
           <div>
             <div className="text-sm font-medium">濕度</div>
@@ -290,7 +291,7 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
                   onSave={handleServerUpdate}
                   trigger={
                     <Button size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       添加服務器
                     </Button>
                   }
@@ -298,11 +299,12 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
               </div>
 
               {rackData.servers.length === 0 ? (
-                <div className="text-center py-4 text-muted-foreground">此機架中沒有服務器</div>
+                <div className="py-4 text-center text-muted-foreground">此機架中沒有服務器</div>
               ) : (
                 <div className="space-y-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {rackData.servers.map((server: any) => (
-                    <div key={server.id} className="flex items-center justify-between p-2 border rounded-md">
+                    <div key={server.id} className="flex items-center justify-between rounded-md border p-2">
                       <div className="flex items-center space-x-2">
                         {getStatusIcon(server.status)}
                         <div>
@@ -338,7 +340,7 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
                               />
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              <Power className="h-4 w-4 mr-2" />
+                              <Power className="mr-2 h-4 w-4" />
                               電源控制
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -348,9 +350,7 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>確認移除服務器</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      您確定要從機架中移除此服務器嗎？此操作無法撤銷。
-                                    </AlertDialogDescription>
+                                    <AlertDialogDescription>您確定要從機架中移除此服務器嗎？此操作無法撤銷。</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>取消</AlertDialogCancel>
@@ -381,5 +381,5 @@ export function RackDetails({ rackId = "a-01" }: RackDetailsProps) {
         <Button>管理服務器</Button>
       </div>
     </div>
-  )
+  );
 }

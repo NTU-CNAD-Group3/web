@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/external-ui/table"
-import { Badge } from "@/components/external-ui/badge"
-import { Button } from "@/components/external-ui/button"
+import { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
+import { Badge } from '@/components/external-ui/badge';
+import { Button } from '@/components/external-ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,110 +11,111 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { Input } from "@/components/external-ui/input"
-import { MoreHorizontal, Power, RefreshCw, Search } from "lucide-react"
+} from '@/components/external-ui/dropdown-menu';
+import { Input } from '@/components/external-ui/input';
+import { MoreHorizontal, Power, RefreshCw, Search } from 'lucide-react';
 import { Link } from '@/components/link';
 
-type ServerStatus = "online" | "offline" | "maintenance"
+type ServerStatus = 'online' | 'offline' | 'maintenance';
 
 interface Server {
-  id: string
-  name: string
-  ip: string
+  id: string;
+  name: string;
+  ip: string;
   location: {
-    datacenter: string
-    room: string
-    rack: string
-    position: string
-  }
-  status: ServerStatus
-  uptime: string
-  lastUpdated: string
-  size: number // Size in U
+    datacenter: string;
+    room: string;
+    rack: string;
+    position: string;
+  };
+  status: ServerStatus;
+  uptime: string;
+  lastUpdated: string;
+  size: number; // Size in U
 }
 
 const servers: Server[] = [
   {
-    id: "server-001",
-    name: "WEB-SRV-01",
-    ip: "192.168.1.101",
+    id: 'server-001',
+    name: 'WEB-SRV-01',
+    ip: '192.168.1.101',
     location: {
-      datacenter: "East Coast DC",
-      room: "Room A",
-      rack: "A-01",
-      position: "36-37",
+      datacenter: 'East Coast DC',
+      room: 'Room A',
+      rack: 'A-01',
+      position: '36-37',
     },
-    status: "online",
-    uptime: "45 days",
-    lastUpdated: "10 minutes ago",
+    status: 'online',
+    uptime: '45 days',
+    lastUpdated: '10 minutes ago',
     size: 2,
   },
   {
-    id: "server-002",
-    name: "DB-SRV-01",
-    ip: "192.168.1.102",
+    id: 'server-002',
+    name: 'DB-SRV-01',
+    ip: '192.168.1.102',
     location: {
-      datacenter: "East Coast DC",
-      room: "Room A",
-      rack: "A-02",
-      position: "30-31",
+      datacenter: 'East Coast DC',
+      room: 'Room A',
+      rack: 'A-02',
+      position: '30-31',
     },
-    status: "online",
-    uptime: "30 days",
-    lastUpdated: "5 minutes ago",
+    status: 'online',
+    uptime: '30 days',
+    lastUpdated: '5 minutes ago',
     size: 2,
   },
   {
-    id: "server-003",
-    name: "APP-SRV-01",
-    ip: "192.168.1.103",
+    id: 'server-003',
+    name: 'APP-SRV-01',
+    ip: '192.168.1.103',
     location: {
-      datacenter: "West Coast DC",
-      room: "Room B",
-      rack: "B-01",
-      position: "25-26",
+      datacenter: 'West Coast DC',
+      room: 'Room B',
+      rack: 'B-01',
+      position: '25-26',
     },
-    status: "maintenance",
-    uptime: "2 hours",
-    lastUpdated: "1 hour ago",
+    status: 'maintenance',
+    uptime: '2 hours',
+    lastUpdated: '1 hour ago',
     size: 2,
   },
   {
-    id: "server-004",
-    name: "STORAGE-01",
-    ip: "192.168.1.104",
+    id: 'server-004',
+    name: 'STORAGE-01',
+    ip: '192.168.1.104',
     location: {
-      datacenter: "Central DC",
-      room: "Room C",
-      rack: "C-03",
-      position: "10-13",
+      datacenter: 'Central DC',
+      room: 'Room C',
+      rack: 'C-03',
+      position: '10-13',
     },
-    status: "offline",
-    uptime: "0",
-    lastUpdated: "2 hours ago",
+    status: 'offline',
+    uptime: '0',
+    lastUpdated: '2 hours ago',
     size: 4,
   },
   {
-    id: "server-005",
-    name: "BACKUP-SRV-01",
-    ip: "192.168.1.105",
+    id: 'server-005',
+    name: 'BACKUP-SRV-01',
+    ip: '192.168.1.105',
     location: {
-      datacenter: "East Coast DC",
-      room: "Room D",
-      rack: "D-01",
-      position: "20-21",
+      datacenter: 'East Coast DC',
+      room: 'Room D',
+      rack: 'D-01',
+      position: '20-21',
     },
-    status: "online",
-    uptime: "15 days",
-    lastUpdated: "15 minutes ago",
+    status: 'online',
+    uptime: '15 days',
+    lastUpdated: '15 minutes ago',
     size: 2,
   },
-]
+];
 
 export function ServerList() {
-  const [serverList, setServerList] = useState<Server[]>(servers)
-  const [searchTerm, setSearchTerm] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [serverList, setServerList] = useState<Server[]>(servers);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredServers = serverList.filter(
     (server) =>
@@ -123,29 +124,29 @@ export function ServerList() {
       server.location.datacenter.toLowerCase().includes(searchTerm.toLowerCase()) ||
       server.location.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
       server.location.rack.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  );
 
   const getStatusBadge = (status: ServerStatus) => {
     switch (status) {
-      case "online":
-        return <Badge className="bg-green-500">Online</Badge>
-      case "offline":
-        return <Badge variant="destructive">Offline</Badge>
-      case "maintenance":
+      case 'online':
+        return <Badge className="bg-green-500">Online</Badge>;
+      case 'offline':
+        return <Badge variant="destructive">Offline</Badge>;
+      case 'maintenance':
         return (
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             Maintenance
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant="outline">Unknown</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 w-full max-w-sm">
+        <div className="flex w-full max-w-sm items-center space-x-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -180,7 +181,7 @@ export function ServerList() {
                 <TableCell className="font-medium">{server.name}</TableCell>
                 <TableCell>{server.ip}</TableCell>
                 <TableCell>
-                  <div className="text-xs space-y-1">
+                  <div className="space-y-1 text-xs">
                     <div>{server.location.datacenter}</div>
                     <div>
                       {server.location.room}, Rack {server.location.rack}
@@ -230,5 +231,5 @@ export function ServerList() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

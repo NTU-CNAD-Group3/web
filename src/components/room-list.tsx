@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/external-ui/table"
-import { Badge } from "@/components/external-ui/badge"
-import { Button } from "@/components/external-ui/button"
+import { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
+import { Badge } from '@/components/external-ui/badge';
+import { Button } from '@/components/external-ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +11,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { Input } from "@/components/external-ui/input"
-import { MoreHorizontal, Plus, Search, SlidersHorizontal } from "lucide-react"
-import { RoomEditDialog } from "@/components/room-edit-dialog"
-import { useToast } from "@/hooks/use-toast"
-import { Link } from "@/components/link"
+} from '@/components/external-ui/dropdown-menu';
+import { Input } from '@/components/external-ui/input';
+import { MoreHorizontal, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { RoomEditDialog } from '@/components/room-edit-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from '@/components/link';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,127 +27,126 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/external-ui/alert-dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
+} from '@/components/external-ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
 
 // Mock data - Rooms list
 const rooms = [
   {
-    id: "room-a",
-    name: "Room A",
-    datacenter: "East Coast DC",
-    status: "operational",
+    id: 'room-a',
+    name: 'Room A',
+    datacenter: 'East Coast DC',
+    status: 'operational',
     racks: 12,
     servers: 48,
-    power: "120/200 kW",
-    temperature: "22°C",
-    area: "1000 sq ft",
+    power: '120/200 kW',
+    temperature: '22°C',
+    area: '1000 sq ft',
   },
   {
-    id: "room-b",
-    name: "Room B",
-    datacenter: "East Coast DC",
-    status: "operational",
+    id: 'room-b',
+    name: 'Room B',
+    datacenter: 'East Coast DC',
+    status: 'operational',
     racks: 8,
     servers: 32,
-    power: "90/150 kW",
-    temperature: "23°C",
-    area: "800 sq ft",
+    power: '90/150 kW',
+    temperature: '23°C',
+    area: '800 sq ft',
   },
   {
-    id: "room-c",
-    name: "Room C",
-    datacenter: "West Coast DC",
-    status: "maintenance",
+    id: 'room-c',
+    name: 'Room C',
+    datacenter: 'West Coast DC',
+    status: 'maintenance',
     racks: 10,
     servers: 40,
-    power: "100/180 kW",
-    temperature: "21°C",
-    area: "900 sq ft",
+    power: '100/180 kW',
+    temperature: '21°C',
+    area: '900 sq ft',
   },
   {
-    id: "room-d",
-    name: "Room D",
-    datacenter: "Central DC",
-    status: "operational",
+    id: 'room-d',
+    name: 'Room D',
+    datacenter: 'Central DC',
+    status: 'operational',
     racks: 6,
     servers: 24,
-    power: "70/120 kW",
-    temperature: "22°C",
-    area: "600 sq ft",
+    power: '70/120 kW',
+    temperature: '22°C',
+    area: '600 sq ft',
   },
   {
-    id: "room-e",
-    name: "Room E",
-    datacenter: "European DC",
-    status: "operational",
+    id: 'room-e',
+    name: 'Room E',
+    datacenter: 'European DC',
+    status: 'operational',
     racks: 8,
     servers: 20,
-    power: "60/100 kW",
-    temperature: "20°C",
-    area: "750 sq ft",
+    power: '60/100 kW',
+    temperature: '20°C',
+    area: '750 sq ft',
   },
-]
+];
 
 // Mock data - Data centers for filtering
 const dataCenters = [
-  { id: "dc-001", name: "East Coast DC" },
-  { id: "dc-002", name: "West Coast DC" },
-  { id: "dc-003", name: "Central DC" },
-  { id: "dc-004", name: "European DC" },
-]
+  { id: 'dc-001', name: 'East Coast DC' },
+  { id: 'dc-002', name: 'West Coast DC' },
+  { id: 'dc-003', name: 'Central DC' },
+  { id: 'dc-004', name: 'European DC' },
+];
 
 export function RoomList() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedDC, setSelectedDC] = useState<string>("all")
-  const [roomsList, setRoomsList] = useState(rooms)
-  const { toast } = useToast()
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDC, setSelectedDC] = useState<string>('all');
+  const [roomsList, setRoomsList] = useState(rooms);
+  const { toast } = useToast();
 
   const filteredRooms = roomsList.filter(
     (room) =>
-      (selectedDC === "all" || room.datacenter === dataCenters.find((dc) => dc.id === selectedDC)?.name) &&
-      (room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        room.datacenter.toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+      (selectedDC === 'all' || room.datacenter === dataCenters.find((dc) => dc.id === selectedDC)?.name) &&
+      (room.name.toLowerCase().includes(searchTerm.toLowerCase()) || room.datacenter.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
 
   const handleRoomUpdate = () => {
     toast({
-      title: "Room Information Updated",
-      description: "Room information has been successfully updated.",
-    })
-  }
+      title: 'Room Information Updated',
+      description: 'Room information has been successfully updated.',
+    });
+  };
 
   const handleRoomDelete = (roomId: string) => {
     // In a real application, this would call an API to delete the room
-    setRoomsList(roomsList.filter((room) => room.id !== roomId))
+    setRoomsList(roomsList.filter((room) => room.id !== roomId));
 
     toast({
-      title: "Room Deleted",
-      description: "The room has been successfully removed from the system.",
-    })
-  }
+      title: 'Room Deleted',
+      description: 'The room has been successfully removed from the system.',
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "operational":
-        return <Badge className="bg-green-500">Operational</Badge>
-      case "maintenance":
+      case 'operational':
+        return <Badge className="bg-green-500">Operational</Badge>;
+      case 'maintenance':
         return (
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             Maintenance
           </Badge>
-        )
-      case "offline":
-        return <Badge variant="destructive">Offline</Badge>
+        );
+      case 'offline':
+        return <Badge variant="destructive">Offline</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant="outline">Unknown</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+        <div className="flex w-full flex-col items-start gap-2 md:w-auto md:flex-row md:items-center">
           <div className="w-full md:w-48">
             <Select value={selectedDC} onValueChange={setSelectedDC}>
               <SelectTrigger>
@@ -163,7 +162,7 @@ export function RoomList() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center space-x-2 w-full md:w-auto">
+          <div className="flex w-full items-center space-x-2 md:w-auto">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search rooms..."
@@ -173,14 +172,14 @@ export function RoomList() {
             />
           </div>
         </div>
-        <div className="flex space-x-2 w-full md:w-auto justify-end">
+        <div className="flex w-full justify-end space-x-2 md:w-auto">
           <Button variant="outline" size="sm">
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
             Filter
           </Button>
           <Link to="/rooms/add">
             <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Room
             </Button>
           </Link>
@@ -255,16 +254,13 @@ export function RoomList() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this room? This action cannot be undone and will remove
-                                all associated rack configurations.
+                                Are you sure you want to delete this room? This action cannot be undone and will remove all associated rack
+                                configurations.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleRoomDelete(room.id)}
-                                className="bg-red-500 hover:bg-red-600"
-                              >
+                              <AlertDialogAction onClick={() => handleRoomDelete(room.id)} className="bg-red-500 hover:bg-red-600">
                                 Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -280,5 +276,5 @@ export function RoomList() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

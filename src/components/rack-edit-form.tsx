@@ -1,79 +1,80 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { Textarea } from "@/components/external-ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { Textarea } from '@/components/external-ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const rackFormSchema = z.object({
   name: z.string().min(2, {
-    message: "機架名稱至少需要2個字符",
+    message: '機架名稱至少需要2個字符',
   }),
   location: z.string().min(1, {
-    message: "請選擇機架位置",
+    message: '請選擇機架位置',
   }),
   model: z.string().min(1, {
-    message: "請輸入機架型號",
+    message: '請輸入機架型號',
   }),
   capacity: z.string().min(1, {
-    message: "請輸入機架容量",
+    message: '請輸入機架容量',
   }),
   powerCapacity: z.string().min(1, {
-    message: "請輸入電源容量",
+    message: '請輸入電源容量',
   }),
   notes: z.string().optional(),
-})
+});
 
-type RackFormValues = z.infer<typeof rackFormSchema>
+type RackFormValues = z.infer<typeof rackFormSchema>;
 
 // 模擬數據 - 機架詳情
 const defaultValues: Partial<RackFormValues> = {
-  name: "A-01",
-  location: "A 排",
-  model: "Dell PowerEdge 42U",
-  capacity: "42U",
-  powerCapacity: "5.0 kW",
-  notes: "主要用於網絡和應用服務器",
-}
+  name: 'A-01',
+  location: 'A 排',
+  model: 'Dell PowerEdge 42U',
+  capacity: '42U',
+  powerCapacity: '5.0 kW',
+  notes: '主要用於網絡和應用服務器',
+};
 
 interface RackEditFormProps {
-  rackId?: string
-  onSave?: () => void
-  initialData?: Partial<RackFormValues>
+  rackId?: string;
+  onSave?: () => void;
+  initialData?: Partial<RackFormValues>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function RackEditForm({ rackId, onSave, initialData }: RackEditFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<RackFormValues>({
     resolver: zodResolver(rackFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   async function onSubmit(data: RackFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // 模擬API調用
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("保存機架數據:", data)
+    console.log('保存機架數據:', data);
 
     toast({
-      title: "機架信息已更新",
+      title: '機架信息已更新',
       description: `機架 ${data.name} 的信息已成功更新。`,
-    })
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     }
   }
 
@@ -189,10 +190,10 @@ export function RackEditForm({ rackId, onSave, initialData }: RackEditFormProps)
             取消
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "保存中..." : "保存更改"}
+            {isLoading ? '保存中...' : '保存更改'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link } from "@/components/link"
-import { Button } from "@/components/external-ui/button"
-import { Card, CardContent, CardFooter } from "@/components/external-ui/card"
-import { Badge } from "@/components/external-ui/badge"
-import { Building2, MoreHorizontal, Plus } from "lucide-react"
+import { useState } from 'react';
+import { Link } from '@/components/link';
+import { Button } from '@/components/external-ui/button';
+import { Card, CardContent, CardFooter } from '@/components/external-ui/card';
+import { Badge } from '@/components/external-ui/badge';
+import { Building2, MoreHorizontal, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,9 +13,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { Progress } from "@/components/external-ui/progress"
-import { useToast } from "@/hooks/use-toast"
+} from '@/components/external-ui/dropdown-menu';
+import { Progress } from '@/components/external-ui/progress';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,15 +26,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/external-ui/alert-dialog"
+} from '@/components/external-ui/alert-dialog';
 
 // Mock data for data centers
 const dataCenters = [
   {
-    id: "dc-001",
-    name: "East Coast DC",
-    location: "New York, NY",
-    status: "operational",
+    id: 'dc-001',
+    name: 'East Coast DC',
+    location: 'New York, NY',
+    status: 'operational',
     rooms: 4,
     servers: 48,
     capacity: {
@@ -42,16 +42,16 @@ const dataCenters = [
       used: 48,
     },
     power: {
-      capacity: "500 kW",
-      usage: "210 kW",
+      capacity: '500 kW',
+      usage: '210 kW',
       usagePercent: 42,
     },
   },
   {
-    id: "dc-002",
-    name: "West Coast DC",
-    location: "San Francisco, CA",
-    status: "operational",
+    id: 'dc-002',
+    name: 'West Coast DC',
+    location: 'San Francisco, CA',
+    status: 'operational',
     rooms: 3,
     servers: 36,
     capacity: {
@@ -59,16 +59,16 @@ const dataCenters = [
       used: 36,
     },
     power: {
-      capacity: "400 kW",
-      usage: "180 kW",
+      capacity: '400 kW',
+      usage: '180 kW',
       usagePercent: 45,
     },
   },
   {
-    id: "dc-003",
-    name: "Central DC",
-    location: "Dallas, TX",
-    status: "maintenance",
+    id: 'dc-003',
+    name: 'Central DC',
+    location: 'Dallas, TX',
+    status: 'maintenance',
     rooms: 2,
     servers: 24,
     capacity: {
@@ -76,16 +76,16 @@ const dataCenters = [
       used: 24,
     },
     power: {
-      capacity: "300 kW",
-      usage: "120 kW",
+      capacity: '300 kW',
+      usage: '120 kW',
       usagePercent: 40,
     },
   },
   {
-    id: "dc-004",
-    name: "European DC",
-    location: "London, UK",
-    status: "operational",
+    id: 'dc-004',
+    name: 'European DC',
+    location: 'London, UK',
+    status: 'operational',
     rooms: 3,
     servers: 20,
     capacity: {
@@ -93,45 +93,45 @@ const dataCenters = [
       used: 20,
     },
     power: {
-      capacity: "350 kW",
-      usage: "140 kW",
+      capacity: '350 kW',
+      usage: '140 kW',
       usagePercent: 40,
     },
   },
-]
+];
 
 export function DataCenterOverview() {
-  const [datacenters, setDatacenters] = useState(dataCenters)
-  const { toast } = useToast()
+  const [datacenters, setDatacenters] = useState(dataCenters);
+  const { toast } = useToast();
 
   const handleDelete = (id: string) => {
-    setDatacenters(datacenters.filter((dc) => dc.id !== id))
+    setDatacenters(datacenters.filter((dc) => dc.id !== id));
     toast({
-      title: "Data Center Deleted",
-      description: "The data center has been successfully removed.",
-    })
-  }
+      title: 'Data Center Deleted',
+      description: 'The data center has been successfully removed.',
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "operational":
-        return <Badge className="bg-green-500">Operational</Badge>
-      case "maintenance":
+      case 'operational':
+        return <Badge className="bg-green-500">Operational</Badge>;
+      case 'maintenance':
         return (
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             Maintenance
           </Badge>
-        )
-      case "offline":
-        return <Badge variant="destructive">Offline</Badge>
+        );
+      case 'offline':
+        return <Badge variant="destructive">Offline</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant="outline">Unknown</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Data Centers ({datacenters.length})</h3>
         <Link to="/datacenters/add">
           <Button>
@@ -141,11 +141,11 @@ export function DataCenterOverview() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {datacenters.map((dc) => (
           <Card key={dc.id} className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="bg-muted p-4 flex justify-between items-start">
+              <div className="flex items-start justify-between bg-muted p-4">
                 <div className="flex items-center space-x-2">
                   <Building2 className="h-5 w-5" />
                   <div>
@@ -155,7 +155,7 @@ export function DataCenterOverview() {
                 </div>
                 {getStatusBadge(dc.status)}
               </div>
-              <div className="p-4 space-y-4">
+              <div className="space-y-4 p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Rooms</p>
@@ -219,16 +219,13 @@ export function DataCenterOverview() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this data center? This action cannot be undone and will
-                            remove all associated rooms and server configurations.
+                            Are you sure you want to delete this data center? This action cannot be undone and will remove all associated
+                            rooms and server configurations.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(dc.id)}
-                            className="bg-red-500 hover:bg-red-600"
-                          >
+                          <AlertDialogAction onClick={() => handleDelete(dc.id)} className="bg-red-500 hover:bg-red-600">
                             Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -242,5 +239,5 @@ export function DataCenterOverview() {
         ))}
       </div>
     </div>
-  )
+  );
 }

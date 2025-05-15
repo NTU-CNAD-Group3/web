@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/external-ui/avatar"
-import { Button } from "@/components/external-ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/external-ui/avatar';
+import { Button } from '@/components/external-ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +8,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { LogOut, Settings, User, UserCog } from "lucide-react"
+} from '@/components/external-ui/dropdown-menu';
+import { LogOut, Settings, User, UserCog } from 'lucide-react';
 
 export function UserNav() {
   return (
@@ -51,5 +51,5 @@ export function UserNav() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

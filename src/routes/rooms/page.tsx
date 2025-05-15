@@ -1,16 +1,15 @@
-import { MainNav } from "@/components/main-nav"
-import { Search } from "@/components/search"
-import { UserNav } from "@/components/user-nav"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/external-ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/external-ui/tabs"
-import { RoomVisualization } from "@/components/room-visualization"
-import { RoomList } from "@/components/room-list"
-import { RoomDetails } from "@/components/room-details"
-
+import { MainNav } from '@/components/main-nav';
+import { Search } from '@/components/search';
+import { UserNav } from '@/components/user-nav';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/external-ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/external-ui/tabs';
+import { RoomVisualization } from '@/components/room-visualization';
+import { RoomList } from '@/components/room-list';
+import { RoomDetails } from '@/components/room-details';
 
 export default function RoomsPage() {
   return (
-    <div className="flex flex-col w-full min-h-screen">
+    <div className="flex min-h-screen w-full flex-col">
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
           <MainNav className="mx-6" />
@@ -66,5 +65,5 @@ export default function RoomsPage() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

@@ -1,39 +1,39 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 const serverFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Server name must be at least 2 characters.",
+    message: 'Server name must be at least 2 characters.',
   }),
   model: z.string().min(1, {
-    message: "Please enter the server model.",
+    message: 'Please enter the server model.',
   }),
   status: z.string({
-    required_error: "Please select a status.",
+    required_error: 'Please select a status.',
   }),
   size: z.string().min(1, {
-    message: "Please select the server size.",
+    message: 'Please select the server size.',
   }),
   datacenter: z.string().min(1, {
-    message: "Please select a data center.",
+    message: 'Please select a data center.',
   }),
   room: z.string().min(1, {
-    message: "Please select a room.",
+    message: 'Please select a room.',
   }),
   rack: z.string().min(1, {
-    message: "Please select a rack.",
+    message: 'Please select a rack.',
   }),
   position: z.string().min(1, {
-    message: "Please enter the position in the rack.",
+    message: 'Please enter the position in the rack.',
   }),
   ip: z.string().optional(),
   hostname: z.string().optional(),
@@ -43,155 +43,156 @@ const serverFormSchema = z.object({
   storage: z.string().optional(),
   managementIp: z.boolean().default(false).optional(),
   notes: z.string().optional(),
-})
+});
 
-type ServerFormValues = z.infer<typeof serverFormSchema>
+type ServerFormValues = z.infer<typeof serverFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<ServerFormValues> = {
-  name: "",
-  model: "",
-  status: "online",
-  size: "2",
-  datacenter: "",
-  room: "",
-  rack: "",
-  position: "",
-  ip: "",
-  hostname: "",
-  os: "",
-  cpu: "",
-  memory: "",
-  storage: "",
+  name: '',
+  model: '',
+  status: 'online',
+  size: '2',
+  datacenter: '',
+  room: '',
+  rack: '',
+  position: '',
+  ip: '',
+  hostname: '',
+  os: '',
+  cpu: '',
+  memory: '',
+  storage: '',
   managementIp: false,
-  notes: "",
-}
+  notes: '',
+};
 
 // Mock data for dropdowns
 const dataCenters = [
-  { id: "dc-001", name: "East Coast DC" },
-  { id: "dc-002", name: "West Coast DC" },
-  { id: "dc-003", name: "Central DC" },
-  { id: "dc-004", name: "European DC" },
-]
+  { id: 'dc-001', name: 'East Coast DC' },
+  { id: 'dc-002', name: 'West Coast DC' },
+  { id: 'dc-003', name: 'Central DC' },
+  { id: 'dc-004', name: 'European DC' },
+];
 
 interface ServerFormProps {
-  serverId?: string
-  onSave?: () => void
-  initialData?: Partial<ServerFormValues>
+  serverId?: string;
+  onSave?: () => void;
+  initialData?: Partial<ServerFormValues>;
 }
 
 export function ServerForm({ serverId, onSave, initialData }: ServerFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedDC, setSelectedDC] = useState<string>("")
-  const [selectedRoom, setSelectedRoom] = useState<string>("")
-  const { toast } = useToast()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDC, setSelectedDC] = useState<string>('');
+  const [selectedRoom, setSelectedRoom] = useState<string>('');
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Get rooms for the selected data center
   const getRoomsForDC = (dcId: string) => {
     // In a real app, this would fetch from an API
-    if (dcId === "East Coast DC") {
+    if (dcId === 'East Coast DC') {
       return [
-        { id: "room-a", name: "Room A" },
-        { id: "room-b", name: "Room B" },
-      ]
-    } else if (dcId === "West Coast DC") {
-      return [{ id: "room-c", name: "Room C" }]
-    } else if (dcId === "Central DC") {
-      return [{ id: "room-d", name: "Room D" }]
-    } else if (dcId === "European DC") {
-      return [{ id: "room-e", name: "Room E" }]
+        { id: 'room-a', name: 'Room A' },
+        { id: 'room-b', name: 'Room B' },
+      ];
+    } else if (dcId === 'West Coast DC') {
+      return [{ id: 'room-c', name: 'Room C' }];
+    } else if (dcId === 'Central DC') {
+      return [{ id: 'room-d', name: 'Room D' }];
+    } else if (dcId === 'European DC') {
+      return [{ id: 'room-e', name: 'Room E' }];
     } else {
-      return []
+      return [];
     }
-  }
+  };
 
   // Get racks for the selected room
   const getRacksForRoom = (roomId: string) => {
     // In a real app, this would fetch from an API
-    if (roomId === "Room A") {
+    if (roomId === 'Room A') {
       return [
-        { id: "a-01", name: "A-01" },
-        { id: "a-02", name: "A-02" },
-        { id: "a-03", name: "A-03" },
-        { id: "a-04", name: "A-04" },
-      ]
-    } else if (roomId === "Room B") {
+        { id: 'a-01', name: 'A-01' },
+        { id: 'a-02', name: 'A-02' },
+        { id: 'a-03', name: 'A-03' },
+        { id: 'a-04', name: 'A-04' },
+      ];
+    } else if (roomId === 'Room B') {
       return [
-        { id: "b-01", name: "B-01" },
-        { id: "b-02", name: "B-02" },
-        { id: "b-03", name: "B-03" },
-      ]
-    } else if (roomId === "Room C") {
+        { id: 'b-01', name: 'B-01' },
+        { id: 'b-02', name: 'B-02' },
+        { id: 'b-03', name: 'B-03' },
+      ];
+    } else if (roomId === 'Room C') {
       return [
-        { id: "c-01", name: "C-01" },
-        { id: "c-02", name: "C-02" },
-        { id: "c-03", name: "C-03" },
-        { id: "c-04", name: "C-04" },
-      ]
-    } else if (roomId === "Room D") {
+        { id: 'c-01', name: 'C-01' },
+        { id: 'c-02', name: 'C-02' },
+        { id: 'c-03', name: 'C-03' },
+        { id: 'c-04', name: 'C-04' },
+      ];
+    } else if (roomId === 'Room D') {
       return [
-        { id: "d-01", name: "D-01" },
-        { id: "d-02", name: "D-02" },
-      ]
-    } else if (roomId === "Room E") {
+        { id: 'd-01', name: 'D-01' },
+        { id: 'd-02', name: 'D-02' },
+      ];
+    } else if (roomId === 'Room E') {
       return [
-        { id: "e-01", name: "E-01" },
-        { id: "e-02", name: "E-02" },
-      ]
+        { id: 'e-01', name: 'E-01' },
+        { id: 'e-02', name: 'E-02' },
+      ];
     } else {
-      return []
+      return [];
     }
-  }
+  };
 
-  const [rooms, setRooms] = useState(getRoomsForDC(selectedDC))
-  const [racks, setRacks] = useState(getRacksForRoom(selectedRoom))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [rooms, setRooms] = useState(getRoomsForDC(selectedDC));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [racks, setRacks] = useState(getRacksForRoom(selectedRoom));
 
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   // Update rooms when data center changes
   const handleDataCenterChange = (value: string) => {
-    setSelectedDC(value)
-    form.setValue("datacenter", value)
-    form.setValue("room", "")
-    form.setValue("rack", "")
-    setRooms(getRoomsForDC(value))
-    setRacks([])
-  }
+    setSelectedDC(value);
+    form.setValue('datacenter', value);
+    form.setValue('room', '');
+    form.setValue('rack', '');
+    setRooms(getRoomsForDC(value));
+    setRacks([]);
+  };
 
   // Update racks when room changes
   const handleRoomChange = (value: string) => {
-    setSelectedRoom(value)
-    form.setValue("room", value)
-    form.setValue("rack", "")
-    setRacks(getRacksForRoom(value))
-  }
+    setSelectedRoom(value);
+    form.setValue('room', value);
+    form.setValue('rack', '');
+    setRacks(getRacksForRoom(value));
+  };
 
   async function onSubmit(data: ServerFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Saving server data:", data)
+    console.log('Saving server data:', data);
 
     toast({
-      title: serverId ? "Server Updated" : "Server Created",
-      description: serverId
-        ? `Server ${data.name} has been updated successfully.`
-        : `Server ${data.name} has been created successfully.`,
-    })
+      title: serverId ? 'Server Updated' : 'Server Created',
+      description: serverId ? `Server ${data.name} has been updated successfully.` : `Server ${data.name} has been created successfully.`,
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     } else {
-      navigate("/servers")
+      navigate('/servers');
     }
   }
 
@@ -327,5 +328,5 @@ export function ServerForm({ serverId, onSave, initialData }: ServerFormProps) {
         </div>
       </form>
     </Form>
-  ) 
+  );
 }

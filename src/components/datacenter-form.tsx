@@ -1,89 +1,89 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { Textarea } from "@/components/external-ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { Textarea } from '@/components/external-ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const dataCenterFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Data center name must be at least 2 characters.",
+    message: 'Data center name must be at least 2 characters.',
   }),
   location: z.string().min(1, {
-    message: "Please enter a location.",
+    message: 'Please enter a location.',
   }),
   status: z.string({
-    required_error: "Please select a status.",
+    required_error: 'Please select a status.',
   }),
   address: z.string().min(1, {
-    message: "Please enter an address.",
+    message: 'Please enter an address.',
   }),
   powerCapacity: z.string().min(1, {
-    message: "Please enter power capacity.",
+    message: 'Please enter power capacity.',
   }),
   coolingCapacity: z.string().min(1, {
-    message: "Please enter cooling capacity.",
+    message: 'Please enter cooling capacity.',
   }),
   notes: z.string().optional(),
-})
+});
 
-type DataCenterFormValues = z.infer<typeof dataCenterFormSchema>
+type DataCenterFormValues = z.infer<typeof dataCenterFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<DataCenterFormValues> = {
-  name: "",
-  location: "",
-  status: "operational",
-  address: "",
-  powerCapacity: "",
-  coolingCapacity: "",
-  notes: "",
-}
+  name: '',
+  location: '',
+  status: 'operational',
+  address: '',
+  powerCapacity: '',
+  coolingCapacity: '',
+  notes: '',
+};
 
 interface DataCenterFormProps {
-  dataCenterId?: string
-  onSave?: () => void
-  initialData?: Partial<DataCenterFormValues>
+  dataCenterId?: string;
+  onSave?: () => void;
+  initialData?: Partial<DataCenterFormValues>;
 }
 
 export function DataCenterForm({ dataCenterId, onSave, initialData }: DataCenterFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<DataCenterFormValues>({
     resolver: zodResolver(dataCenterFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   async function onSubmit(data: DataCenterFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Removed unnecessary console.log statement to prevent logging in production
 
     toast({
-      title: dataCenterId ? "Data Center Updated" : "Data Center Created",
+      title: dataCenterId ? 'Data Center Updated' : 'Data Center Created',
       description: dataCenterId
         ? `Data center ${data.name} has been updated successfully.`
         : `Data center ${data.name} has been created successfully.`,
-    })
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     } else {
-      navigate("/datacenters")
+      navigate('/datacenters');
     }
   }
 
@@ -202,11 +202,7 @@ export function DataCenterForm({ dataCenterId, onSave, initialData }: DataCenter
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Additional information about this data center"
-                  className="resize-none"
-                  {...field}
-                />
+                <Textarea placeholder="Additional information about this data center" className="resize-none" {...field} />
               </FormControl>
               <FormDescription>Any additional information or special considerations</FormDescription>
               <FormMessage />
@@ -215,14 +211,14 @@ export function DataCenterForm({ dataCenterId, onSave, initialData }: DataCenter
         />
 
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={() => navigate("/datacenters")} type="button">
+          <Button variant="outline" onClick={() => navigate('/datacenters')} type="button">
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : dataCenterId ? "Save Changes" : "Create Data Center"}
+            {isLoading ? 'Saving...' : dataCenterId ? 'Save Changes' : 'Create Data Center'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

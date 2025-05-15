@@ -1,97 +1,95 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { Textarea } from "@/components/external-ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { Textarea } from '@/components/external-ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const roomFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Room name must be at least 2 characters.",
+    message: 'Room name must be at least 2 characters.',
   }),
   datacenter: z.string().min(1, {
-    message: "Please select a data center.",
+    message: 'Please select a data center.',
   }),
   status: z.string({
-    required_error: "Please select a status.",
+    required_error: 'Please select a status.',
   }),
   area: z.string().min(1, {
-    message: "Please enter the room area.",
+    message: 'Please enter the room area.',
   }),
   maxRacks: z.string().min(1, {
-    message: "Please enter the maximum number of racks.",
+    message: 'Please enter the maximum number of racks.',
   }),
   powerCapacity: z.string().min(1, {
-    message: "Please enter the power capacity.",
+    message: 'Please enter the power capacity.',
   }),
   coolingCapacity: z.string().min(1, {
-    message: "Please enter the cooling capacity.",
+    message: 'Please enter the cooling capacity.',
   }),
   notes: z.string().optional(),
-})
+});
 
-type RoomFormValues = z.infer<typeof roomFormSchema>
+type RoomFormValues = z.infer<typeof roomFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<RoomFormValues> = {
-  name: "",
-  datacenter: "",
-  status: "operational",
-  area: "",
-  maxRacks: "",
-  powerCapacity: "",
-  coolingCapacity: "",
-  notes: "",
-}
+  name: '',
+  datacenter: '',
+  status: 'operational',
+  area: '',
+  maxRacks: '',
+  powerCapacity: '',
+  coolingCapacity: '',
+  notes: '',
+};
 
 // Mock data - Data centers for selection
 const dataCenters = [
-  { id: "dc-001", name: "East Coast DC" },
-  { id: "dc-002", name: "West Coast DC" },
-  { id: "dc-003", name: "Central DC" },
-  { id: "dc-004", name: "European DC" },
-]
+  { id: 'dc-001', name: 'East Coast DC' },
+  { id: 'dc-002', name: 'West Coast DC' },
+  { id: 'dc-003', name: 'Central DC' },
+  { id: 'dc-004', name: 'European DC' },
+];
 
 interface RoomEditFormProps {
-  roomId?: string
-  onSave?: () => void
-  initialData?: Partial<RoomFormValues>
+  roomId?: string;
+  onSave?: () => void;
+  initialData?: Partial<RoomFormValues>;
 }
 
 export function RoomEditForm({ roomId, onSave, initialData }: RoomEditFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<RoomFormValues>({
     resolver: zodResolver(roomFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   async function onSubmit(data: RoomFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Saving room data:", data)
+    console.log('Saving room data:', data);
 
     toast({
-      title: roomId ? "Room Information Updated" : "Room Created",
-      description: roomId
-        ? `Room ${data.name} has been updated successfully.`
-        : `Room ${data.name} has been created successfully.`,
-    })
+      title: roomId ? 'Room Information Updated' : 'Room Created',
+      description: roomId ? `Room ${data.name} has been updated successfully.` : `Room ${data.name} has been created successfully.`,
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     }
   }
 
@@ -249,10 +247,10 @@ export function RoomEditForm({ roomId, onSave, initialData }: RoomEditFormProps)
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : roomId ? "Save Changes" : "Create Room"}
+            {isLoading ? 'Saving...' : roomId ? 'Save Changes' : 'Create Room'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const data = [
-  { name: "00:00", cpu: 65, memory: 58, network: 42 },
-  { name: "04:00", cpu: 59, memory: 60, network: 45 },
-  { name: "08:00", cpu: 80, memory: 71, network: 60 },
-  { name: "12:00", cpu: 81, memory: 76, network: 65 },
-  { name: "16:00", cpu: 76, memory: 70, network: 58 },
-  { name: "20:00", cpu: 68, memory: 65, network: 50 },
-  { name: "24:00", cpu: 62, memory: 60, network: 47 },
-]
+  { name: '00:00', cpu: 65, memory: 58, network: 42 },
+  { name: '04:00', cpu: 59, memory: 60, network: 45 },
+  { name: '08:00', cpu: 80, memory: 71, network: 60 },
+  { name: '12:00', cpu: 81, memory: 76, network: 65 },
+  { name: '16:00', cpu: 76, memory: 70, network: 58 },
+  { name: '20:00', cpu: 68, memory: 65, network: 50 },
+  { name: '24:00', cpu: 62, memory: 60, network: 47 },
+];
 
 export function ServerMetrics() {
   return (
@@ -36,5 +36,5 @@ export function ServerMetrics() {
         </LineChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

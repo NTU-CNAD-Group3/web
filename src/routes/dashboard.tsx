@@ -1,9 +1,8 @@
 import { Link } from '@/components/link';
-import { DashboardOverview } from "@/components/dashboard-overview"
-import { MainNav } from "@/components/main-nav"
-import { Search } from "@/components/search"
-import { UserNav } from "@/components/user-nav"
-
+import { DashboardOverview } from '@/components/dashboard-overview';
+import { MainNav } from '@/components/main-nav';
+import { Search } from '@/components/search';
+import { UserNav } from '@/components/user-nav';
 
 export default function DashboardPage() {
   return (
@@ -32,5 +31,5 @@ export default function DashboardPage() {
         <DashboardOverview />
       </div>
     </div>
-  )
+  );
 }

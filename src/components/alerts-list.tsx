@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { AlertCircle, AlertTriangle, Info, MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/external-ui/button"
+import { useState } from 'react';
+import { AlertCircle, AlertTriangle, Info, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/external-ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,93 +10,94 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
+} from '@/components/external-ui/dropdown-menu';
 
-type AlertSeverity = "critical" | "warning" | "info"
-type AlertStatus = "active" | "acknowledged" | "resolved"
+type AlertSeverity = 'critical' | 'warning' | 'info';
+type AlertStatus = 'active' | 'acknowledged' | 'resolved';
 
 interface Alert {
-  id: string
-  severity: AlertSeverity
-  status: AlertStatus
-  message: string
-  source: string
-  timestamp: string
+  id: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  message: string;
+  source: string;
+  timestamp: string;
 }
 
 const alerts: Alert[] = [
   {
-    id: "alert-001",
-    severity: "critical",
-    status: "active",
-    message: "DB-SRV-01 low disk space (5% available)",
-    source: "Storage Monitoring",
-    timestamp: "10 minutes ago",
+    id: 'alert-001',
+    severity: 'critical',
+    status: 'active',
+    message: 'DB-SRV-01 low disk space (5% available)',
+    source: 'Storage Monitoring',
+    timestamp: '10 minutes ago',
   },
   {
-    id: "alert-002",
-    severity: "warning",
-    status: "active",
-    message: "WEB-SRV-01 high CPU usage (92%)",
-    source: "Performance Monitoring",
-    timestamp: "25 minutes ago",
+    id: 'alert-002',
+    severity: 'warning',
+    status: 'active',
+    message: 'WEB-SRV-01 high CPU usage (92%)',
+    source: 'Performance Monitoring',
+    timestamp: '25 minutes ago',
   },
   {
-    id: "alert-003",
-    severity: "critical",
-    status: "acknowledged",
-    message: "BACKUP-SRV-01 backup failed",
-    source: "Backup System",
-    timestamp: "1 hour ago",
+    id: 'alert-003',
+    severity: 'critical',
+    status: 'acknowledged',
+    message: 'BACKUP-SRV-01 backup failed',
+    source: 'Backup System',
+    timestamp: '1 hour ago',
   },
   {
-    id: "alert-004",
-    severity: "info",
-    status: "active",
-    message: "System update available",
-    source: "System Management",
-    timestamp: "2 hours ago",
+    id: 'alert-004',
+    severity: 'info',
+    status: 'active',
+    message: 'System update available',
+    source: 'System Management',
+    timestamp: '2 hours ago',
   },
   {
-    id: "alert-005",
-    severity: "warning",
-    status: "resolved",
-    message: "Network connectivity unstable",
-    source: "Network Monitoring",
-    timestamp: "3 hours ago",
+    id: 'alert-005',
+    severity: 'warning',
+    status: 'resolved',
+    message: 'Network connectivity unstable',
+    source: 'Network Monitoring',
+    timestamp: '3 hours ago',
   },
-]
+];
 
 export function AlertsList({ showAll = false }: { showAll?: boolean }) {
-  const [alertsList, setAlertsList] = useState<Alert[]>(alerts)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [alertsList, setAlertsList] = useState<Alert[]>(alerts);
 
-  const displayAlerts = showAll ? alertsList : alertsList.slice(0, 3)
+  const displayAlerts = showAll ? alertsList : alertsList.slice(0, 3);
 
   const getSeverityIcon = (severity: AlertSeverity) => {
     switch (severity) {
-      case "critical":
-        return <AlertCircle className="h-5 w-5 text-red-500" />
-      case "warning":
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />
-      case "info":
-        return <Info className="h-5 w-5 text-blue-500" />
+      case 'critical':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+      case 'info':
+        return <Info className="h-5 w-5 text-blue-500" />;
       default:
-        return <Info className="h-5 w-5" />
+        return <Info className="h-5 w-5" />;
     }
-  }
+  };
 
   const getStatusBadge = (status: AlertStatus) => {
     switch (status) {
-      case "active":
-        return <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">Active</span>
-      case "acknowledged":
-        return <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">Acknowledged</span>
-      case "resolved":
-        return <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Resolved</span>
+      case 'active':
+        return <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800">Active</span>;
+      case 'acknowledged':
+        return <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">Acknowledged</span>;
+      case 'resolved':
+        return <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">Resolved</span>;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -138,5 +139,5 @@ export function AlertsList({ showAll = false }: { showAll?: boolean }) {
         </Button>
       )}
     </div>
-  )
+  );
 }

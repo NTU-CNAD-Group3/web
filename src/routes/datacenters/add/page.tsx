@@ -1,16 +1,15 @@
-import { MainNav } from "@/components/main-nav"
-import { Search } from "@/components/search"
-import { UserNav } from "@/components/user-nav"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/external-ui/card"
-import { DataCenterForm } from "@/components/datacenter-form"
-import { Button } from "@/components/external-ui/button"
-import { ChevronLeft } from "lucide-react"
-import { Link } from "@/components/link"
-
+import { MainNav } from '@/components/main-nav';
+import { Search } from '@/components/search';
+import { UserNav } from '@/components/user-nav';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/external-ui/card';
+import { DataCenterForm } from '@/components/datacenter-form';
+import { Button } from '@/components/external-ui/button';
+import { ChevronLeft } from 'lucide-react';
+import { Link } from '@/components/link';
 
 export default function AddDataCenterPage() {
   return (
-    <div className="flex flex-col w-full min-h-screen">
+    <div className="flex min-h-screen w-full flex-col">
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
           <MainNav className="mx-6" />
@@ -24,7 +23,7 @@ export default function AddDataCenterPage() {
         <div className="flex items-center space-x-2">
           <Link to="/datacenters">
             <Button variant="outline" size="sm">
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronLeft className="mr-1 h-4 w-4" />
               Back
             </Button>
           </Link>
@@ -41,5 +40,5 @@ export default function AddDataCenterPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

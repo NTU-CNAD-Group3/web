@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import { Link } from "@/components/link"
+import { Link } from '@/components/link';
 
-import { useState, useEffect } from "react"
-import { AlertCircle, CheckCircle2, MoreHorizontal, Plus, Power, Server, Thermometer, WrenchIcon } from "lucide-react"
-import { Badge } from "@/components/external-ui/badge"
-import { Button } from "@/components/external-ui/button"
-import { Progress } from "@/components/external-ui/progress"
+import { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle2, MoreHorizontal, Plus, Power, Server, Thermometer, WrenchIcon } from 'lucide-react';
+import { Badge } from '@/components/external-ui/badge';
+import { Button } from '@/components/external-ui/button';
+import { Progress } from '@/components/external-ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +14,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/external-ui/dropdown-menu"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/external-ui/accordion"
-import { RoomEditDialog } from "@/components/room-edit-dialog"
-import { RackConfigDialog } from "@/components/rack-config-dialog"
-import { useToast } from "@/hooks/use-toast"
+} from '@/components/external-ui/dropdown-menu';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/external-ui/accordion';
+import { RoomEditDialog } from '@/components/room-edit-dialog';
+import { RackConfigDialog } from '@/components/rack-config-dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,182 +29,183 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/external-ui/alert-dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
+} from '@/components/external-ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
 
 // Mock data - Room details
 const roomsData = {
-  "room-a": {
-    id: "room-a",
-    name: "Room A",
-    datacenter: "East Coast DC",
-    status: "operational",
-    area: "1000 sq ft",
+  'room-a': {
+    id: 'room-a',
+    name: 'Room A',
+    datacenter: 'East Coast DC',
+    status: 'operational',
+    area: '1000 sq ft',
     maxRacks: 20,
     racks: 12,
     usedRacks: 12,
     power: {
-      capacity: "200 kW",
-      usage: "120 kW",
+      capacity: '200 kW',
+      usage: '120 kW',
       usagePercent: 60,
     },
     cooling: {
-      capacity: "150 tons",
-      usage: "90 tons",
+      capacity: '150 tons',
+      usage: '90 tons',
       usagePercent: 60,
     },
-    temperature: "22°C",
-    humidity: "45%",
+    temperature: '22°C',
+    humidity: '45%',
     racksList: [
       {
-        id: "a-01",
-        name: "A-01",
-        status: "online",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "36U",
+        id: 'a-01',
+        name: 'A-01',
+        status: 'online',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '36U',
         servers: 12,
-        power: "3.2 kW",
+        power: '3.2 kW',
       },
       {
-        id: "a-02",
-        name: "A-02",
-        status: "online",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "28U",
+        id: 'a-02',
+        name: 'A-02',
+        status: 'online',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '28U',
         servers: 8,
-        power: "2.8 kW",
+        power: '2.8 kW',
       },
       {
-        id: "a-03",
-        name: "A-03",
-        status: "maintenance",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "12U",
+        id: 'a-03',
+        name: 'A-03',
+        status: 'maintenance',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '12U',
         servers: 4,
-        power: "1.5 kW",
+        power: '1.5 kW',
       },
       {
-        id: "a-04",
-        name: "A-04",
-        status: "online",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "38U",
+        id: 'a-04',
+        name: 'A-04',
+        status: 'online',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '38U',
         servers: 15,
-        power: "4.1 kW",
+        power: '4.1 kW',
       },
     ],
   },
-  "room-b": {
-    id: "room-b",
-    name: "Room B",
-    datacenter: "East Coast DC",
-    status: "operational",
-    area: "800 sq ft",
+  'room-b': {
+    id: 'room-b',
+    name: 'Room B',
+    datacenter: 'East Coast DC',
+    status: 'operational',
+    area: '800 sq ft',
     maxRacks: 15,
     racks: 8,
     usedRacks: 8,
     power: {
-      capacity: "150 kW",
-      usage: "90 kW",
+      capacity: '150 kW',
+      usage: '90 kW',
       usagePercent: 60,
     },
     cooling: {
-      capacity: "120 tons",
-      usage: "70 tons",
+      capacity: '120 tons',
+      usage: '70 tons',
       usagePercent: 58,
     },
-    temperature: "23°C",
-    humidity: "40%",
+    temperature: '23°C',
+    humidity: '40%',
     racksList: [
       {
-        id: "b-01",
-        name: "B-01",
-        status: "online",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "30U",
+        id: 'b-01',
+        name: 'B-01',
+        status: 'online',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '30U',
         servers: 10,
-        power: "2.9 kW",
+        power: '2.9 kW',
       },
       {
-        id: "b-02",
-        name: "B-02",
-        status: "offline",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "0U",
+        id: 'b-02',
+        name: 'B-02',
+        status: 'offline',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '0U',
         servers: 0,
-        power: "0 kW",
+        power: '0 kW',
       },
       {
-        id: "b-03",
-        name: "B-03",
-        status: "online",
-        model: "APC NetShelter SX 42U",
-        capacity: "42U",
-        usedCapacity: "32U",
+        id: 'b-03',
+        name: 'B-03',
+        status: 'online',
+        model: 'APC NetShelter SX 42U',
+        capacity: '42U',
+        usedCapacity: '32U',
         servers: 12,
-        power: "3.4 kW",
+        power: '3.4 kW',
       },
     ],
   },
-}
+};
 
 // Mock data - Data centers for selection
 const dataCenters = [
-  { id: "dc-001", name: "East Coast DC" },
-  { id: "dc-002", name: "West Coast DC" },
-  { id: "dc-003", name: "Central DC" },
-  { id: "dc-004", name: "European DC" },
-]
+  { id: 'dc-001', name: 'East Coast DC' },
+  { id: 'dc-002', name: 'West Coast DC' },
+  { id: 'dc-003', name: 'Central DC' },
+  { id: 'dc-004', name: 'European DC' },
+];
 
 interface RoomDetailsProps {
-  roomId?: string
+  roomId?: string;
 }
 
-export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
-  const [selectedDC, setSelectedDC] = useState<string>("dc-001")
-  const [selectedRoom, setSelectedRoom] = useState<string>(roomId)
-  const [roomData, setRoomData] = useState<any>(null)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const { toast } = useToast()
+export function RoomDetails({ roomId = 'room-a' }: RoomDetailsProps) {
+  const [selectedDC, setSelectedDC] = useState<string>('dc-001');
+  const [selectedRoom, setSelectedRoom] = useState<string>(roomId);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [roomData, setRoomData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
 
   // Get rooms for the selected data center
   const getRoomsForDC = (dcId: string) => {
     // In a real app, this would fetch from an API
-    if (dcId === "dc-001") {
+    if (dcId === 'dc-001') {
       return [
-        { id: "room-a", name: "Room A" },
-        { id: "room-b", name: "Room B" },
-      ]
-    } else if (dcId === "dc-002") {
-      return [{ id: "room-c", name: "Room C" }]
-    } else if (dcId === "dc-003") {
-      return [{ id: "room-d", name: "Room D" }]
+        { id: 'room-a', name: 'Room A' },
+        { id: 'room-b', name: 'Room B' },
+      ];
+    } else if (dcId === 'dc-002') {
+      return [{ id: 'room-c', name: 'Room C' }];
+    } else if (dcId === 'dc-003') {
+      return [{ id: 'room-d', name: 'Room D' }];
     } else {
-      return [{ id: "room-e", name: "Room E" }]
+      return [{ id: 'room-e', name: 'Room E' }];
     }
-  }
+  };
 
-  const [rooms, setRooms] = useState(getRoomsForDC(selectedDC))
+  const [rooms, setRooms] = useState(getRoomsForDC(selectedDC));
 
   useEffect(() => {
     // Update rooms when data center changes
-    setRooms(getRoomsForDC(selectedDC))
+    setRooms(getRoomsForDC(selectedDC));
     // Reset selected room if not in the new data center
     if (!getRoomsForDC(selectedDC).some((r) => r.id === selectedRoom)) {
-      setSelectedRoom(getRoomsForDC(selectedDC)[0]?.id || "")
+      setSelectedRoom(getRoomsForDC(selectedDC)[0]?.id || '');
     }
-  }, [selectedDC])
+  }, [selectedRoom, selectedDC]);
 
   useEffect(() => {
     // In a real application, this would fetch from an API
-    setRoomData(roomsData[selectedRoom as keyof typeof roomsData] || null)
-  }, [selectedRoom, refreshKey])
+    setRoomData(roomsData[selectedRoom as keyof typeof roomsData] || null);
+  }, [selectedRoom, refreshKey]);
 
   if (!roomData) {
     return (
@@ -241,89 +242,91 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
         </div>
         <div>Loading room data...</div>
       </div>
-    )
+    );
   }
 
   const handleRoomUpdate = () => {
     toast({
-      title: "Room Information Updated",
+      title: 'Room Information Updated',
       description: `Room ${roomData.name} information has been successfully updated.`,
-    })
-    setRefreshKey((prev) => prev + 1)
-  }
+    });
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const handleRackUpdate = () => {
     toast({
-      title: "Rack Added",
-      description: "New rack has been successfully added to the room.",
-    })
-    setRefreshKey((prev) => prev + 1)
-  }
+      title: 'Rack Added',
+      description: 'New rack has been successfully added to the room.',
+    });
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const handleRackRemove = (rackId: string) => {
     toast({
-      title: "Rack Removed",
-      description: "Rack has been removed from the room.",
-    })
+      title: 'Rack Removed',
+      description: 'Rack has been removed from the room.',
+    });
     // In a real application, this would call an API to delete the rack
     // Simulate removing a rack
-    const updatedRacks = roomData.racksList.filter((rack: any) => rack.id !== rackId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedRacks = roomData.racksList.filter((rack: any) => rack.id !== rackId);
     setRoomData({
       ...roomData,
       racksList: updatedRacks,
       racks: updatedRacks.length,
-    })
-  }
+    });
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "operational":
-      case "online":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case "offline":
-        return <AlertCircle className="h-5 w-5 text-red-500" />
-      case "maintenance":
-        return <WrenchIcon className="h-5 w-5 text-yellow-500" />
+      case 'operational':
+      case 'online':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'offline':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      case 'maintenance':
+        return <WrenchIcon className="h-5 w-5 text-yellow-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusText = (status: string) => {
     switch (status) {
-      case "operational":
-      case "online":
-        return "Operational"
-      case "offline":
-        return "Offline"
-      case "maintenance":
-        return "Maintenance"
+      case 'operational':
+      case 'online':
+        return 'Operational';
+      case 'offline':
+        return 'Offline';
+      case 'maintenance':
+        return 'Maintenance';
       default:
-        return "Unknown"
+        return 'Unknown';
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "operational":
-      case "online":
-        return <Badge className="bg-green-500">Operational</Badge>
-      case "offline":
-        return <Badge variant="destructive">Offline</Badge>
-      case "maintenance":
+      case 'operational':
+      case 'online':
+        return <Badge className="bg-green-500">Operational</Badge>;
+      case 'offline':
+        return <Badge variant="destructive">Offline</Badge>;
+      case 'maintenance':
         return (
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             Maintenance
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant="outline">Unknown</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 justify-between md:items-center">
+      <div className="flex flex-col justify-between space-y-2 md:flex-row md:items-center md:space-y-0">
         <div className="flex space-x-2">
           <div className="w-48">
             <Select value={selectedDC} onValueChange={setSelectedDC}>
@@ -378,7 +381,7 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <div className="text-sm text-muted-foreground">Data Center</div>
           <div>{roomData.datacenter}</div>
@@ -395,6 +398,7 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
         </div>
         <div className="space-y-2">
           <div className="text-sm text-muted-foreground">Servers</div>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <div>{roomData.racksList.reduce((acc: number, rack: any) => acc + rack.servers, 0)} servers</div>
         </div>
       </div>
@@ -418,15 +422,15 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex items-center space-x-2 p-3 border rounded-md">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex items-center space-x-2 rounded-md border p-3">
           <Thermometer className="h-5 w-5 text-orange-500" />
           <div>
             <div className="text-sm font-medium">Temperature</div>
             <div>{roomData.temperature}</div>
           </div>
         </div>
-        <div className="flex items-center space-x-2 p-3 border rounded-md">
+        <div className="flex items-center space-x-2 rounded-md border p-3">
           <Server className="h-5 w-5 text-blue-500" />
           <div>
             <div className="text-sm font-medium">Humidity</div>
@@ -446,7 +450,7 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
                   onSave={handleRackUpdate}
                   trigger={
                     <Button size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Add Rack
                     </Button>
                   }
@@ -454,11 +458,12 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
               </div>
 
               {roomData.racksList.length === 0 ? (
-                <div className="text-center py-4 text-muted-foreground">No racks in this room</div>
+                <div className="py-4 text-center text-muted-foreground">No racks in this room</div>
               ) : (
                 <div className="space-y-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {roomData.racksList.map((rack: any) => (
-                    <div key={rack.id} className="flex items-center justify-between p-2 border rounded-md">
+                    <div key={rack.id} className="flex items-center justify-between rounded-md border p-2">
                       <div className="flex items-center space-x-2">
                         {getStatusIcon(rack.status)}
                         <div>
@@ -499,7 +504,7 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                              <Power className="h-4 w-4 mr-2" />
+                              <Power className="mr-2 h-4 w-4" />
                               Power Control
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -510,16 +515,12 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Confirm Removal</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to remove this rack from the room? This action cannot be
-                                      undone.
+                                      Are you sure you want to remove this rack from the room? This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleRackRemove(rack.id)}
-                                      className="bg-red-500 hover:bg-red-600"
-                                    >
+                                    <AlertDialogAction onClick={() => handleRackRemove(rack.id)} className="bg-red-500 hover:bg-red-600">
                                       Remove
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
@@ -543,5 +544,5 @@ export function RoomDetails({ roomId = "room-a" }: RoomDetailsProps) {
         <Button>Manage Racks</Button>
       </div>
     </div>
-  )
+  );
 }

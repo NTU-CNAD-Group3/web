@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -59,6 +57,7 @@ function InteractiveTable() {
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
   const [viewedItem, setViewedItem] = useState<Item | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [editableDescription, setEditableDescription] = useState('');
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -95,6 +94,7 @@ function InteractiveTable() {
 
   const handleEdit = () => {
     if (viewedItem) {
+      setEditableDescription(viewedItem.description);
       setIsEditing(true);
     }
   };
@@ -138,6 +138,25 @@ function InteractiveTable() {
       setRacks(Array(rackCount).fill({ racktName: '', serviceName: '', height: '' }));
     }
   }, [rackCount, operationType]);
+
+  const handleEditSave = () => {
+    if (!viewedItem) return;
+
+    const updatedItems = items.map((item) => (item.id === viewedItem.id ? { ...item, description: editableDescription } : item));
+
+    setItems(updatedItems);
+
+    // Also update the viewedItem if still needed
+    setViewedItem((prev) => (prev ? { ...prev, description: editableDescription } : null));
+
+    setIsEditing(false);
+  };
+
+  useEffect(() => {
+    if (viewedItem) {
+      setEditableDescription(viewedItem.description);
+    }
+  }, [viewedItem]);
 
   // simulate save operation
   const handleSave = () => {
@@ -389,7 +408,12 @@ function InteractiveTable() {
               <CardContent>
                 <p className="mb-2 text-sm text-muted-foreground">Date: {viewedItem.time}</p>
                 <h3 className="mb-1 font-medium">Description:</h3>
-                <p>{viewedItem.description}</p>
+                <textarea value={editableDescription} onChange={(e) => setEditableDescription(e.target.value)} disabled={!isEditing} />
+                {isEditing && (
+                  <Button onClick={handleEditSave} className="ml-2" variant="secondary">
+                    Save
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (

@@ -1,31 +1,31 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { Checkbox } from "@/components/external-ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { Checkbox } from '@/components/external-ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 const userFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: 'Name must be at least 2 characters.',
   }),
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: 'Please enter a valid email address.',
   }),
   role: z.string({
-    required_error: "Please select a role.",
+    required_error: 'Please select a role.',
   }),
   department: z.string().min(1, {
-    message: "Please enter a department.",
+    message: 'Please enter a department.',
   }),
   status: z.string({
-    required_error: "Please select a status.",
+    required_error: 'Please select a status.',
   }),
   permissions: z.object({
     manageDataCenters: z.boolean().default(false),
@@ -35,17 +35,17 @@ const userFormSchema = z.object({
     viewReports: z.boolean().default(false),
     manageUsers: z.boolean().default(false),
   }),
-})
+});
 
-type UserFormValues = z.infer<typeof userFormSchema>
+type UserFormValues = z.infer<typeof userFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<UserFormValues> = {
-  name: "",
-  email: "",
-  role: "user",
-  department: "",
-  status: "active",
+  name: '',
+  email: '',
+  role: 'user',
+  department: '',
+  status: 'active',
   permissions: {
     manageDataCenters: false,
     manageRooms: false,
@@ -54,67 +54,65 @@ const defaultValues: Partial<UserFormValues> = {
     viewReports: false,
     manageUsers: false,
   },
-}
+};
 
 interface UserRoleFormProps {
-  userId?: string
-  onSave?: () => void
-  initialData?: Partial<UserFormValues>
+  userId?: string;
+  onSave?: () => void;
+  initialData?: Partial<UserFormValues>;
 }
 
 export function UserRoleForm({ userId, onSave, initialData }: UserRoleFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   // Set default permissions based on role
   const handleRoleChange = (value: string) => {
-    form.setValue("role", value)
+    form.setValue('role', value);
 
-    if (value === "administrator") {
-      form.setValue("permissions", {
+    if (value === 'administrator') {
+      form.setValue('permissions', {
         manageDataCenters: true,
         manageRooms: true,
         manageRacks: true,
         manageServers: true,
         viewReports: true,
         manageUsers: true,
-      })
+      });
     } else {
-      form.setValue("permissions", {
+      form.setValue('permissions', {
         manageDataCenters: false,
         manageRooms: false,
         manageRacks: true,
         manageServers: true,
         viewReports: true,
         manageUsers: false,
-      })
+      });
     }
-  }
+  };
 
   async function onSubmit(data: UserFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Saving user data:", data)
+    console.log('Saving user data:', data);
 
     toast({
-      title: userId ? "User Updated" : "User Created",
-      description: userId
-        ? `User ${data.name} has been updated successfully.`
-        : `User ${data.name} has been created successfully.`,
-    })
+      title: userId ? 'User Updated' : 'User Created',
+      description: userId ? `User ${data.name} has been updated successfully.` : `User ${data.name} has been created successfully.`,
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     }
   }
 
@@ -217,8 +215,8 @@ export function UserRoleForm({ userId, onSave, initialData }: UserRoleFormProps)
         </div>
 
         <div>
-          <h3 className="text-lg font-medium mb-2">Permissions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="mb-2 text-lg font-medium">Permissions</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
               name="permissions.manageDataCenters"
@@ -317,10 +315,10 @@ export function UserRoleForm({ userId, onSave, initialData }: UserRoleFormProps)
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : userId ? "Save Changes" : "Create User"}
+            {isLoading ? 'Saving...' : userId ? 'Save Changes' : 'Create User'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

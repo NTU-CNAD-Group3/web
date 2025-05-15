@@ -1,86 +1,85 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { Textarea } from "@/components/external-ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { Textarea } from '@/components/external-ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const rackFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Rack name must be at least 2 characters.",
+    message: 'Rack name must be at least 2 characters.',
   }),
   model: z.string().min(1, {
-    message: "Please enter the rack model.",
+    message: 'Please enter the rack model.',
   }),
   status: z.string({
-    required_error: "Please select a status.",
+    required_error: 'Please select a status.',
   }),
   capacity: z.string().min(1, {
-    message: "Please enter the rack capacity.",
+    message: 'Please enter the rack capacity.',
   }),
   powerCapacity: z.string().min(1, {
-    message: "Please enter the power capacity.",
+    message: 'Please enter the power capacity.',
   }),
   location: z.string().min(1, {
-    message: "Please enter the rack location within the room.",
+    message: 'Please enter the rack location within the room.',
   }),
   notes: z.string().optional(),
-})
+});
 
-type RackFormValues = z.infer<typeof rackFormSchema>
+type RackFormValues = z.infer<typeof rackFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<RackFormValues> = {
-  name: "",
-  model: "APC NetShelter SX 42U",
-  status: "online",
-  capacity: "42U",
-  powerCapacity: "5.0 kW",
-  location: "",
-  notes: "",
-}
+  name: '',
+  model: 'APC NetShelter SX 42U',
+  status: 'online',
+  capacity: '42U',
+  powerCapacity: '5.0 kW',
+  location: '',
+  notes: '',
+};
 
 interface RackConfigFormProps {
-  rackId?: string
-  roomId?: string
-  onSave?: () => void
-  initialData?: Partial<RackFormValues>
+  rackId?: string;
+  roomId?: string;
+  onSave?: () => void;
+  initialData?: Partial<RackFormValues>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function RackConfigForm({ rackId, roomId, onSave, initialData }: RackConfigFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<RackFormValues>({
     resolver: zodResolver(rackFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   async function onSubmit(data: RackFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Saving rack data:", data)
+    console.log('Saving rack data:', data);
 
     toast({
-      title: rackId ? "Rack Information Updated" : "Rack Created",
-      description: rackId
-        ? `Rack ${data.name} has been updated successfully.`
-        : `Rack ${data.name} has been created successfully.`,
-    })
+      title: rackId ? 'Rack Information Updated' : 'Rack Created',
+      description: rackId ? `Rack ${data.name} has been updated successfully.` : `Rack ${data.name} has been created successfully.`,
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     }
   }
 
@@ -212,10 +211,10 @@ export function RackConfigForm({ rackId, roomId, onSave, initialData }: RackConf
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : rackId ? "Save Changes" : "Create Rack"}
+            {isLoading ? 'Saving...' : rackId ? 'Save Changes' : 'Create Rack'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

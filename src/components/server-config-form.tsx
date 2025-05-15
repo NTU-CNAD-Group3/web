@@ -1,79 +1,80 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/external-ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/external-ui/form"
-import { Input } from "@/components/external-ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/external-ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/external-ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/external-ui/form';
+import { Input } from '@/components/external-ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/external-ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const serverFormSchema = z.object({
   name: z.string().min(2, {
-    message: "服務器名稱至少需要2個字符",
+    message: '服務器名稱至少需要2個字符',
   }),
   model: z.string().min(1, {
-    message: "請輸入服務器型號",
+    message: '請輸入服務器型號',
   }),
   status: z.string({
-    required_error: "請選擇服務器狀態",
+    required_error: '請選擇服務器狀態',
   }),
   position: z.string().min(1, {
-    message: "請輸入機架位置",
+    message: '請輸入機架位置',
   }),
   size: z.string().min(1, {
-    message: "請輸入服務器大小",
+    message: '請輸入服務器大小',
   }),
   ip: z.string().optional(),
-})
+});
 
-type ServerFormValues = z.infer<typeof serverFormSchema>
+type ServerFormValues = z.infer<typeof serverFormSchema>;
 
 // 模擬數據 - 服務器詳情
 const defaultValues: Partial<ServerFormValues> = {
-  name: "",
-  model: "",
-  status: "online",
-  position: "",
-  size: "2",
-  ip: "",
-}
+  name: '',
+  model: '',
+  status: 'online',
+  position: '',
+  size: '2',
+  ip: '',
+};
 
 interface ServerConfigFormProps {
-  serverId?: string
-  rackId?: string
-  onSave?: () => void
-  initialData?: Partial<ServerFormValues>
+  serverId?: string;
+  rackId?: string;
+  onSave?: () => void;
+  initialData?: Partial<ServerFormValues>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function ServerConfigForm({ serverId, rackId, onSave, initialData }: ServerConfigFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverFormSchema),
     defaultValues: initialData || defaultValues,
-  })
+  });
 
   async function onSubmit(data: ServerFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // 模擬API調用
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("保存服務器數據:", data)
+    console.log('保存服務器數據:', data);
 
     toast({
-      title: serverId ? "服務器信息已更新" : "服務器已添加",
+      title: serverId ? '服務器信息已更新' : '服務器已添加',
       description: serverId ? `服務器 ${data.name} 的信息已成功更新。` : `服務器 ${data.name} 已成功添加到機架。`,
-    })
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (onSave) {
-      onSave()
+      onSave();
     }
   }
 
@@ -200,10 +201,10 @@ export function ServerConfigForm({ serverId, rackId, onSave, initialData }: Serv
             取消
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "保存中..." : serverId ? "保存更改" : "添加服務器"}
+            {isLoading ? '保存中...' : serverId ? '保存更改' : '添加服務器'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }
