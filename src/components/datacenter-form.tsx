@@ -69,7 +69,7 @@ export function DataCenterForm({ dataCenterId, onSave, initialData }: DataCenter
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    console.log("Saving data center data:", data)
+    // Removed unnecessary console.log statement to prevent logging in production
 
     toast({
       title: dataCenterId ? "Data Center Updated" : "Data Center Created",
