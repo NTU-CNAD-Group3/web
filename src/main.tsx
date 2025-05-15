@@ -16,6 +16,20 @@ import ChangePasswordConfirm from '@/routes/change-password-confirm';
 import LoginStat from '@/routes/login-stat';
 import Layout from '@/layout';
 
+import Dashboard from '@/routes/dashboard';
+import DataCenters from '@/routes/datacenters/page';
+import AddDataCenter from '@/routes/datacenters/add/page';
+import Monitoring from '@/routes/monitoring/page';
+import QueryTool from '@/routes/query/page';
+import Racks from '@/routes/racks/page';
+import AddRack from '@/routes/racks/add/page';
+import RackDetails from '@/routes/racks/[id]/page';
+import Rooms from '@/routes/rooms/page';
+import Servers from '@/routes/servers/page';
+import AddServer from '@/routes/servers/add/page';
+import Users from '@/routes/users/page';
+import BLayout from '@/layout-b';
+
 import './index.css';
 
 const pageTransition = {
@@ -111,6 +125,20 @@ const AnimatedRoutes = () => {
               </motion.div>
             }
           />
+        </Route>
+        <Route element={<BLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/datacenters" element={<DataCenters />} />
+          <Route path="/datacenters/add" element={<AddDataCenter />} />
+          <Route path="/monitoring" element={<Monitoring />} />
+          <Route path="/query" element={<QueryTool />} />
+          <Route path="/racks" element={<Racks />} />
+          <Route path="/racks/add" element={<AddRack />} />
+          <Route path="/racks/:id" element={<RackDetails />} />
+          <Route path="/rooms" element={<Rooms />} />
+          <Route path="/servers" element={<Servers />} />
+          <Route path="/servers/add" element={<AddServer />} />
+          <Route path="/users" element={<Users />} />
         </Route>
       </Routes>
     </AnimatePresence>
