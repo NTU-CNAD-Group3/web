@@ -49,6 +49,7 @@ interface RackEditFormProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore TS6133: rackId
 export function RackEditForm({ rackId, onSave, initialData }: RackEditFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();

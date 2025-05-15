@@ -39,12 +39,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         day_hidden: 'invisible',
         ...classNames,
       }}
-      components={{
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
-      }}
+  components={{
+    Chevron: (props) => {
+      return props.orientation === "left" ? <ChevronLeft {...props} /> : <ChevronRight {...props} />;
+    },
+  }}
       {...props}
     />
   );

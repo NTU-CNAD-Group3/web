@@ -69,7 +69,7 @@ const alerts: Alert[] = [
 
 export function AlertsList({ showAll = false }: { showAll?: boolean }) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [alertsList, setAlertsList] = useState<Alert[]>(alerts);
+  const [alertsList, _setAlertsList] = useState<Alert[]>(alerts);
 
   const displayAlerts = showAll ? alertsList : alertsList.slice(0, 3);
 

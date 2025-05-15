@@ -168,6 +168,7 @@ export function RackDetails({ rackId = 'a-01' }: RackDetailsProps) {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore TS6133: getStatusText
   const getStatusText = (status: string) => {
     switch (status) {
       case 'online':

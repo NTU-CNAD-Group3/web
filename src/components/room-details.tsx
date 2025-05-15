@@ -292,6 +292,7 @@ export function RoomDetails({ roomId = 'room-a' }: RoomDetailsProps) {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore TS6133: getStatusText
   const getStatusText = (status: string) => {
     switch (status) {
       case 'operational':

@@ -75,7 +75,7 @@ const users = [
 export function UserRoleManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [usersList, setUsersList] = useState(users);
+  const [usersList, _setUsersList] = useState(users);
   const { toast } = useToast();
 
   const filteredUsers = usersList.filter(

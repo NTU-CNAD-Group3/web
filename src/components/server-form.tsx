@@ -83,7 +83,7 @@ interface ServerFormProps {
 
 export function ServerForm({ serverId, onSave, initialData }: ServerFormProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
   const [selectedDC, setSelectedDC] = useState<string>('');
   const [selectedRoom, setSelectedRoom] = useState<string>('');
   const { toast } = useToast();
@@ -147,9 +147,9 @@ export function ServerForm({ serverId, onSave, initialData }: ServerFormProps) {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [rooms, setRooms] = useState(getRoomsForDC(selectedDC));
+  const [_rooms, setRooms] = useState(getRoomsForDC(selectedDC));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [racks, setRacks] = useState(getRacksForRoom(selectedRoom));
+  const [_racks, setRacks] = useState(getRacksForRoom(selectedRoom));
 
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverFormSchema),

@@ -49,6 +49,7 @@ interface ServerConfigFormProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore TS6133: rackId
 export function ServerConfigForm({ serverId, rackId, onSave, initialData }: ServerConfigFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();

@@ -114,7 +114,7 @@ const servers: Server[] = [
 
 export function ServerList() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [serverList, setServerList] = useState<Server[]>(servers);
+  const [serverList, _setServerList] = useState<Server[]>(servers);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredServers = serverList.filter(
