@@ -153,7 +153,8 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onOpenChange: (open: any) => {
         if (!open) dismiss();
       },
     },

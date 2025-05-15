@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
 import { Badge } from '@/components/external-ui/badge';
@@ -76,6 +74,7 @@ const users = [
 
 export function UserRoleManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [usersList, setUsersList] = useState(users);
   const { toast } = useToast();
 
@@ -93,14 +92,13 @@ export function UserRoleManagement() {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleUserDelete = (userId: string) => {
-    setUsersList(usersList.filter((user) => user.id !== userId));
-    toast({
-      title: 'User Deleted',
-      description: 'The user has been successfully removed from the system.',
-    });
-  };
+  // const handleUserDelete = (userId: string) => {
+  //   setUsersList(usersList.filter((user) => user.id !== userId));
+  //   toast({
+  //     title: 'User Deleted',
+  //     description: 'The user has been successfully removed from the system.',
+  //   });
+  // };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
