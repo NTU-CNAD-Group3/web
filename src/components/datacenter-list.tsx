@@ -1,114 +1,116 @@
-'use client';
-
-import { useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
-import { Badge } from '@/components/external-ui/badge';
-import { Button } from '@/components/external-ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/external-ui/dropdown-menu';
 import { Input } from '@/components/external-ui/input';
-import { MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react';
-import { Link } from '@/components/link';
+import { Search, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/external-ui/alert-dialog';
+import { Button } from '@/components/external-ui/button';
 
-// Mock data for data centers
-const dataCenters = [
-  {
-    id: 'dc-001',
-    name: 'East Coast DC',
-    location: 'New York, NY',
-    status: 'operational',
-    rooms: 4,
-    racks: 24,
-    servers: 48,
-    power: '210/500 kW',
-    temperature: '22°C',
-  },
-  {
-    id: 'dc-002',
-    name: 'West Coast DC',
-    location: 'San Francisco, CA',
-    status: 'operational',
-    rooms: 3,
-    racks: 18,
-    servers: 36,
-    power: '180/400 kW',
-    temperature: '23°C',
-  },
-  {
-    id: 'dc-003',
-    name: 'Central DC',
-    location: 'Dallas, TX',
-    status: 'maintenance',
-    rooms: 2,
-    racks: 12,
-    servers: 24,
-    power: '120/300 kW',
-    temperature: '21°C',
-  },
-  {
-    id: 'dc-004',
-    name: 'European DC',
-    location: 'London, UK',
-    status: 'operational',
-    rooms: 3,
-    racks: 15,
-    servers: 20,
-    power: '140/350 kW',
-    temperature: '20°C',
-  },
-];
+type Server = {
+  name?: string;
+};
+
+type Rack = {
+  name: string;
+  service: string;
+  serverNum: number;
+  servers: Record<string, Server>;
+};
+
+type Room = {
+  name: string;
+  rackNum: number;
+  racks: Record<string, Rack>;
+};
+
+type DataCenter = {
+  id: string;
+  name: string;
+  roomNum: number;
+  rooms: Record<string, Room>;
+};
 
 export function DataCenterList() {
+  const [dcList, setDcList] = useState<DataCenter[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [dcList, setDcList] = useState(dataCenters);
   const { toast } = useToast();
 
-  const filteredDCs = dcList.filter(
-    (dc) => dc.name.toLowerCase().includes(searchTerm.toLowerCase()) || dc.location.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const fetchDataCenters = async () => {
+    console.log('Session:', sessionStorage.getItem('session'));
 
-  const handleDelete = (id: string) => {
-    setDcList(dcList.filter((dc) => dc.id !== id));
-    toast({
-      title: 'Data Center Deleted',
-      description: 'The data center has been successfully removed.',
-    });
-  };
+    try {
+      const response = await fetch('http://localhost:8001/api/v1/gateway/backend/allDC', {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'operational':
-        return <Badge className="bg-green-500">Operational</Badge>;
-      case 'maintenance':
-        return (
-          <Badge variant="outline" className="border-yellow-500 text-yellow-500">
-            Maintenance
-          </Badge>
-        );
-      case 'offline':
-        return <Badge variant="destructive">Offline</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawData = result.data as Record<string, any>;
+
+      const structured: DataCenter[] = Object.entries(rawData).map(([dcId, dc]) => ({
+        id: dcId,
+        name: dc.name || 'Unnamed DC',
+        roomNum: dc.roomNum || 0,
+        rooms: dc.rooms || {},
+      }));
+
+      setDcList(structured);
+    } catch (error) {
+      toast({
+        title: 'Failed to fetch data centers',
+        description: 'Check your API or server status.',
+        variant: 'destructive',
+      });
+      console.error('Fetch error:', error);
     }
   };
+
+  useEffect(() => {
+    fetchDataCenters();
+  });
+
+  const handleDelete = async (dcName: string, e: React.MouseEvent) => {
+    // Stop the click event from bubbling up to parent elements (row expansion)
+    e.stopPropagation();
+
+    try {
+      const response = await fetch('http://localhost:8001/api/v1/gateway/backend/DC', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: dcName }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Data center "${dcName}" has been deleted.`,
+      });
+
+      // Refresh the data center list
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Deletion Failed',
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
+      });
+      console.error('Delete error:', error);
+    }
+  };
+
+  const filteredDCs = dcList.filter((dc) => dc.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="space-y-4">
@@ -117,10 +119,6 @@ export function DataCenterList() {
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search data centers..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="h-9" />
         </div>
-        <Button variant="outline" size="sm">
-          <SlidersHorizontal className="mr-2 h-4 w-4" />
-          Filter
-        </Button>
       </div>
 
       <div className="rounded-md border">
@@ -128,79 +126,73 @@ export function DataCenterList() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Rooms</TableHead>
               <TableHead>Racks</TableHead>
               <TableHead>Servers</TableHead>
-              <TableHead>Power</TableHead>
-              <TableHead>Temp</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {filteredDCs.map((dc) => (
-              <TableRow key={dc.id}>
-                <TableCell className="font-medium">{dc.name}</TableCell>
-                <TableCell>{dc.location}</TableCell>
-                <TableCell>{getStatusBadge(dc.status)}</TableCell>
-                <TableCell>{dc.rooms}</TableCell>
-                <TableCell>{dc.racks}</TableCell>
-                <TableCell>{dc.servers}</TableCell>
-                <TableCell>{dc.power}</TableCell>
-                <TableCell>{dc.temperature}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+            {filteredDCs.map((dc) => {
+              const dcKey = dc.id;
+              const isExpanded = expanded[dcKey];
+
+              let rackCount = 0;
+              let serverCount = 0;
+              Object.values(dc.rooms).forEach((room) => {
+                rackCount += room.rackNum;
+                Object.values(room.racks).forEach((rack) => {
+                  serverCount += rack.serverNum;
+                });
+              });
+
+              return (
+                <React.Fragment key={dcKey}>
+                  <TableRow className="cursor-pointer" onClick={() => setExpanded((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}>
+                    <TableCell className="font-medium">{dc.name}</TableCell>
+                    <TableCell>{dc.roomNum}</TableCell>
+                    <TableCell>{rackCount}</TableCell>
+                    <TableCell>{serverCount}</TableCell>
+                    <TableCell className="flex items-center justify-end space-x-2 text-right">
+                      <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)} className="h-8 px-2">
+                        <Trash className="mr-1 h-4 w-4" />
+                        Delete
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}`} className="w-full">
-                          View Details
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}/edit`} className="w-full">
-                          Edit
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}/rooms`} className="w-full">
-                          Manage Rooms
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-500">
-                        <AlertDialog>
-                          <AlertDialogTrigger className="w-full text-left">Delete</AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this data center? This action cannot be undone and will remove all
-                                associated rooms and server configurations.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(dc.id)} className="bg-red-500 hover:bg-red-600">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                      <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
+                    </TableCell>
+                  </TableRow>
+
+                  {isExpanded && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        {Object.entries(dc.rooms).map(([roomId, room]) => (
+                          <div key={roomId} className="mb-4 ml-4 border-l pl-4">
+                            <p className="font-semibold">Room: {room.name}</p>
+                            {Object.entries(room.racks).map(([rackId, rack]) => (
+                              <div key={rackId} className="ml-4 border-l pl-4">
+                                <p className="text-sm font-medium">
+                                  Rack: {rack.name} (Service: {rack.service})
+                                </p>
+                                {Object.keys(rack.servers).length > 0 ? (
+                                  <ul className="ml-4 list-disc text-sm">
+                                    {Object.entries(rack.servers).map(([serverId, server]) => (
+                                      <li key={serverId}>{server.name || `Server ${serverId}`}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="ml-4 text-sm text-muted-foreground">No servers</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
