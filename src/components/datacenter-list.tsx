@@ -40,7 +40,7 @@ export function DataCenterList() {
     console.log('Session:', sessionStorage.getItem('session'));
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/gateway/backend/allDC', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/allDC`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -73,14 +73,15 @@ export function DataCenterList() {
 
   useEffect(() => {
     fetchDataCenters();
-  });
+  }, []);
 
   const handleDelete = async (dcName: string, e: React.MouseEvent) => {
     // Stop the click event from bubbling up to parent elements (row expansion)
     e.stopPropagation();
+    console.log('Delete clicked for:', dcName);
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/gateway/backend/DC', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -90,6 +91,19 @@ export function DataCenterList() {
       });
 
       if (!response.ok) {
+        // check if the message is "Fab is not Empty"
+        const result = await response.json();
+        if (result.message === 'Fab is not Empty') {
+          console.log('Fab is not Empty');
+          // i want to have a warning on top of the page
+          toast({
+            title: 'Warning',
+            description: 'This data center is not empty. Please remove all rooms and racks before deleting.',
+            variant: 'destructive',
+          });
+
+          return;
+        }
         throw new Error(`Delete failed: ${response.status}`);
       }
 
@@ -111,6 +125,167 @@ export function DataCenterList() {
   };
 
   const filteredDCs = dcList.filter((dc) => dc.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const [createForm, setCreateForm] = useState<Record<string, { roomName: string; rackNum: number; height: number }>>({});
+  const [showCreateForm, setShowCreateForm] = useState<Record<string, boolean>>({});
+
+  const handleInputChange = (dcId: string, field: string, value: string | number) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      [dcId]: {
+        ...prev[dcId],
+        [field]: field === 'rackNum' || field === 'height' ? Number(value) : value,
+      },
+    }));
+  };
+
+  const handleBuildRoom = async (dcName: string, dcId: string) => {
+  const form = createForm[dcId];
+  if (!form || !form.roomName || !form.rackNum || !form.height) {
+    toast({
+      title: 'Missing Information',
+      description: 'Please fill in all fields before submitting.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  const requestBody = {
+    fabName: dcName,
+    roomNum: 1,
+    roomArray: [
+      {
+        name: form.roomName,
+        rackNum: form.rackNum,
+        height: form.height,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Create room failed: ${response.status}`);
+    }
+
+    toast({
+      title: 'Room Created',
+      description: `Room "${form.roomName}" created in DC "${dcName}".`,
+    });
+
+    setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Creation Failed',
+      description: error instanceof Error ? error.message : 'Unknown error occurred',
+      variant: 'destructive',
+    });
+  }
+};
+
+const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
+const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
+
+const handleUpdateDC = async (dcId: string, newName: string) => {
+  if (!newName.trim()) {
+    toast({
+      title: 'Invalid Name',
+      description: 'The data center name cannot be empty.',
+      variant: 'destructive',
+    });
+    return;
+  }
+  // remove the dirst 2 letters of dcId and make it a number
+  dcId = dcId.substring(2);
+  const dcIdNum = parseInt(dcId, 10);
+  console.log('dcIdNum:', dcIdNum);
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: dcIdNum,
+        name: newName.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Update failed with status: ${response.status}`);
+    }
+
+    toast({
+      title: 'Data Center Updated',
+      description: `Successfully renamed to "${newName}".`,
+    });
+
+    // Clear edit mode and input
+    setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
+    setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
+
+    // Refresh the list
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Update Failed',
+      description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      variant: 'destructive',
+    });
+    console.error('Update error:', error);
+  }
+};
+
+
+  const HandleDeleteRoom = async (dcname: string, roomId: string) => {
+    try {
+      console.log('Delete clicked for:', roomId);
+      roomId = roomId.substring(4);
+      console.log('roomId:', roomId);
+      // remove the dirst 2 letters of dcId and make it a number
+      const roomIdNm = parseInt(roomId, 10);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/room`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fabName: dcname, roomId: roomIdNm }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Room "${roomId}" has been deleted.`,
+      });
+
+      // Refresh the data center list
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Deletion Failed',
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
+      });
+      console.error('Delete error:', error);
+    }
+  };
+
+
 
   return (
     <div className="space-y-4">
@@ -155,12 +330,102 @@ export function DataCenterList() {
                     <TableCell>{rackCount}</TableCell>
                     <TableCell>{serverCount}</TableCell>
                     <TableCell className="flex items-center justify-end space-x-2 text-right">
-                      <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)} className="h-8 px-2">
+                      <Button 
+                        size="sm"
+                        onClick={() => setShowCreateForm((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}
+                        className="flex items-center justify-end space-x-2 text-right"
+                      >
+                        {showCreateForm[dcKey] ? 'Cancel' : 'Create Room'}
+                      </Button>
+                      {/* <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)} className="h-8 px-2">
                         <Trash className="mr-1 h-4 w-4" />
                         Delete
                       </Button>
-                      <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
+                      <span>{isExpanded ? 'Collapse' : 'Expand'}</span> */}
+
+                      <TableCell className="flex flex-col items-end space-y-1 text-right">
+                        {isEditingDc[dcKey] ? (
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              className="h-8"
+                              value={editFormDc[dcKey] ?? dc.name}
+                              onChange={(e) =>
+                                setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))
+                              }
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => handleDelete(dc.name, e)}
+                            >
+                              <Trash className="mr-1 h-4 w-4" />
+                              Delete
+                            </Button>
+                            <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
+                          </div>
+                        )}
+                      </TableCell>
+
+
+
                     </TableCell>
+                    
+
+                    {showCreateForm[dcKey] && (
+                      <div className="ml-4 mt-2 space-y-2 rounded-md border bg-muted/10 p-4 text-sm">
+                        <div className="space-y-1">
+                          <label className="block">Room Name</label>
+                          <Input
+                            value={createForm[dcKey]?.roomName || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'roomName', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block">Rack Number</label>
+                          <Input
+                            type="number"
+                            value={createForm[dcKey]?.rackNum || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'rackNum', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block">Height</label>
+                          <Input
+                            type="number"
+                            value={createForm[dcKey]?.height || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'height', e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          className="mt-2"
+                          onClick={() => handleBuildRoom(dc.name, dcKey)}
+                        >
+                          Build Room
+                        </Button>
+                      </div>
+                    )}
                   </TableRow>
 
                   {isExpanded && (
@@ -168,12 +433,25 @@ export function DataCenterList() {
                       <TableCell colSpan={5}>
                         {Object.entries(dc.rooms).map(([roomId, room]) => (
                           <div key={roomId} className="mb-4 ml-4 border-l pl-4">
-                            <p className="font-semibold">Room: {room.name}</p>
+                            
+                            <TableCell>
+                              <p className="font-semibold">Room: {room.name}</p>
+                              <Button
+                                className="mt-2"
+                                onClick={() => HandleDeleteRoom(dc.name, roomId)}
+                                variant="destructive"
+                                size="sm"
+                              > 
+                                delete room
+                              </Button>
+                            </TableCell>
                             {Object.entries(room.racks).map(([rackId, rack]) => (
                               <div key={rackId} className="ml-4 border-l pl-4">
-                                <p className="text-sm font-medium">
+                                <div className=" font-medium">
                                   Rack: {rack.name} (Service: {rack.service})
-                                </p>
+                                  
+                                </div>
+                                
                                 {Object.keys(rack.servers).length > 0 ? (
                                   <ul className="ml-4 list-disc text-sm">
                                     {Object.entries(rack.servers).map(([serverId, server]) => (
