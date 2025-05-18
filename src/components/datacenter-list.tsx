@@ -13,12 +13,14 @@ type Server = {
 type Rack = {
   name: string;
   service: string;
+  height: number;
   serverNum: number;
   servers: Record<string, Server>;
 };
 
 type Room = {
   name: string;
+  height: number;
   rackNum: number;
   racks: Record<string, Rack>;
 };
@@ -285,6 +287,132 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
     }
   };
 
+  const [creatingRackFor, setCreatingRackFor] = useState<string | null>(null);
+  const [newRackData, setNewRackData] = useState({
+    name: '',
+    height: '',
+    service: '',
+  });
+
+  const HandleCreateRack = async (dcName: string, roomId: string, rackHeight: number) => {
+
+    roomId = roomId.substring(4);
+    const roomIdNum = parseInt(roomId, 10);
+    console.log('roomId:', roomId);
+    console.log('Creating rack for:', dcName, roomIdNum);
+    console.log('Rack data:', newRackData);
+    if (!newRackData.name || !newRackData.height || !newRackData.service) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all fields before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const rackHeightNum = parseInt(newRackData.height, 10);
+
+    if( rackHeightNum > rackHeight) {
+      console.log('Rack height exceeds room height');
+      toast({
+        title: 'Invalid Height',
+        description: `Rack height cannot exceed room height of ${rackHeight}.`,
+        variant: 'destructive',
+      });
+      setCreatingRackFor(null);
+      return;
+    }
+    const body = {
+      fabName: dcName,
+      roomId:roomIdNum,
+      rackNum: 1,
+      rackArray: [
+        {
+          name: newRackData.name,
+          height: newRackData.height,
+          service: newRackData.service,
+        },
+      ],
+    };
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/racks`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    console.log('Response:', response);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create rack');
+    }
+
+    toast({
+      title: 'Success',
+      description: `Rack "${newRackData.name}" created in Room "${roomId}"`,
+    });
+
+    // Reset
+    setCreatingRackFor(null);
+    setNewRackData({ name: '', height: '', service: '' });
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Creation Failed',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'destructive',
+    });
+  }
+};
+
+const HandleDeleteRack = async (roomId: string, rackId: string) => {
+  roomId = roomId.substring(4);
+  const roomIdNum = parseInt(roomId, 10);
+  rackId = rackId.substring(4);
+  const rackIdNum = parseInt(rackId, 10);
+  console.log('roomId:', roomIdNum);
+  console.log('Deleting rack:', rackIdNum);
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rack`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        roomId: roomIdNum,
+        rackId: rackIdNum,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to delete rack');
+    }
+
+    toast({
+      title: 'Success',
+      description: `Rack "${rackId}" deleted from Room "${roomId}".`,
+    });
+
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Deletion Failed',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'destructive',
+    });
+  }
+};
+
+
+
+
 
 
   return (
@@ -436,6 +564,8 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                             
                             <TableCell>
                               <p className="font-semibold">Room: {room.name}</p>
+                              <p className="text-sm text-muted-foreground">Height: {room.height}</p>
+                              <p className="text-sm text-muted-foreground">Rack Number: {room.rackNum}</p>
                               <Button
                                 className="mt-2"
                                 onClick={() => HandleDeleteRoom(dc.name, roomId)}
@@ -444,11 +574,50 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                               > 
                                 delete room
                               </Button>
+
+                              <Button
+                                className="mt-2"
+                                onClick={() =>
+                                  setCreatingRackFor((prev) => (prev === `${dc.name}-${roomId}` ? null : `${dc.name}-${roomId}`))
+                                }
+                                size="sm"
+                              >
+                                {creatingRackFor === `${dc.name}-${roomId}` ? 'Cancel' : 'Create Rack'}
+                              </Button>
+
+                              {creatingRackFor === `${dc.name}-${roomId}` && (
+                                <div className="mt-2 space-y-2">
+                                  <Input
+                                    placeholder="Rack Name"
+                                    value={newRackData.name}
+                                    onChange={(e) => setNewRackData({ ...newRackData, name: e.target.value })}
+                                  />
+                                  <Input
+                                    placeholder="Rack Height"
+                                    value={newRackData.height}
+                                    onChange={(e) => setNewRackData({ ...newRackData, height: e.target.value })}
+                                  />
+                                  <Input
+                                    placeholder="Rack Service"
+                                    value={newRackData.service}
+                                    onChange={(e) => setNewRackData({ ...newRackData, service: e.target.value })}
+                                  />
+                                  <Button onClick={() => HandleCreateRack(dc.name, roomId, room.height)}>Build</Button>
+                                </div>
+                              )}
                             </TableCell>
                             {Object.entries(room.racks).map(([rackId, rack]) => (
                               <div key={rackId} className="ml-4 border-l pl-4">
                                 <div className=" font-medium">
-                                  Rack: {rack.name} (Service: {rack.service})
+                                  Rack: {rack.name} height:{rack.height} (Service: {rack.service})
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="ml-2"
+                                    onClick={() => HandleDeleteRack(roomId, rackId)}
+                                  >
+                                    Delete Rack
+                                  </Button>
                                   
                                 </div>
                                 
