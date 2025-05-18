@@ -31,6 +31,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             email: form.email,
             password: form.password,
           }),
+          credentials: 'include',
         });
 
         if (!response.ok) {
@@ -39,12 +40,13 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         } else {
           const session = await response.json();
           console.log('✅ Session:', session); // 🔍 Log the session
+          sessionStorage.setItem('session', JSON.stringify(session));
 
           // Optionally store session info
           // localStorage.setItem('token', session.token);
 
           // 🔁 Redirect to /main
-          navigate('/main');
+          navigate('/datacenters');
         }
       } catch (err) {
         console.error('❌ Network error:', err);

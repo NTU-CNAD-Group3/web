@@ -1,114 +1,419 @@
-'use client';
-
-import { useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
-import { Badge } from '@/components/external-ui/badge';
-import { Button } from '@/components/external-ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/external-ui/dropdown-menu';
 import { Input } from '@/components/external-ui/input';
-import { MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react';
-import { Link } from '@/components/link';
+import { Search, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/external-ui/alert-dialog';
+import { Button } from '@/components/external-ui/button';
 
-// Mock data for data centers
-const dataCenters = [
-  {
-    id: 'dc-001',
-    name: 'East Coast DC',
-    location: 'New York, NY',
-    status: 'operational',
-    rooms: 4,
-    racks: 24,
-    servers: 48,
-    power: '210/500 kW',
-    temperature: '22°C',
-  },
-  {
-    id: 'dc-002',
-    name: 'West Coast DC',
-    location: 'San Francisco, CA',
-    status: 'operational',
-    rooms: 3,
-    racks: 18,
-    servers: 36,
-    power: '180/400 kW',
-    temperature: '23°C',
-  },
-  {
-    id: 'dc-003',
-    name: 'Central DC',
-    location: 'Dallas, TX',
-    status: 'maintenance',
-    rooms: 2,
-    racks: 12,
-    servers: 24,
-    power: '120/300 kW',
-    temperature: '21°C',
-  },
-  {
-    id: 'dc-004',
-    name: 'European DC',
-    location: 'London, UK',
-    status: 'operational',
-    rooms: 3,
-    racks: 15,
-    servers: 20,
-    power: '140/350 kW',
-    temperature: '20°C',
-  },
-];
+type Server = {
+  name?: string;
+};
+
+type Rack = {
+  name: string;
+  service: string;
+  height: number;
+  serverNum: number;
+  servers: Record<string, Server>;
+};
+
+type Room = {
+  name: string;
+  height: number;
+  rackNum: number;
+  racks: Record<string, Rack>;
+};
+
+type DataCenter = {
+  id: string;
+  name: string;
+  roomNum: number;
+  rooms: Record<string, Room>;
+};
 
 export function DataCenterList() {
+  const [dcList, setDcList] = useState<DataCenter[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [dcList, setDcList] = useState(dataCenters);
   const { toast } = useToast();
 
-  const filteredDCs = dcList.filter(
-    (dc) => dc.name.toLowerCase().includes(searchTerm.toLowerCase()) || dc.location.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const fetchDataCenters = async () => {
+    console.log('Session:', sessionStorage.getItem('session'));
 
-  const handleDelete = (id: string) => {
-    setDcList(dcList.filter((dc) => dc.id !== id));
-    toast({
-      title: 'Data Center Deleted',
-      description: 'The data center has been successfully removed.',
-    });
-  };
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/allDC`, {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'operational':
-        return <Badge className="bg-green-500">Operational</Badge>;
-      case 'maintenance':
-        return (
-          <Badge variant="outline" className="border-yellow-500 text-yellow-500">
-            Maintenance
-          </Badge>
-        );
-      case 'offline':
-        return <Badge variant="destructive">Offline</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawData = result.data as Record<string, any>;
+
+      const structured: DataCenter[] = Object.entries(rawData).map(([dcId, dc]) => ({
+        id: dcId,
+        name: dc.name || 'Unnamed DC',
+        roomNum: dc.roomNum || 0,
+        rooms: dc.rooms || {},
+      }));
+
+      setDcList(structured);
+    } catch (error) {
+      toast({
+        title: 'Failed to fetch data centers',
+        description: 'Check your API or server status.',
+        variant: 'destructive',
+      });
+      console.error('Fetch error:', error);
     }
   };
+
+  useEffect(() => {
+    fetchDataCenters();
+  }, []);
+
+  const handleDelete = async (dcName: string, e: React.MouseEvent) => {
+    // Stop the click event from bubbling up to parent elements (row expansion)
+    e.stopPropagation();
+    console.log('Delete clicked for:', dcName);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: dcName }),
+      });
+
+      if (!response.ok) {
+        // check if the message is "Fab is not Empty"
+        const result = await response.json();
+        if (result.message === 'Fab is not Empty') {
+          console.log('Fab is not Empty');
+          // i want to have a warning on top of the page
+          toast({
+            title: 'Warning',
+            description: 'This data center is not empty. Please remove all rooms and racks before deleting.',
+            variant: 'destructive',
+          });
+
+          return;
+        }
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Data center "${dcName}" has been deleted.`,
+      });
+
+      // Refresh the data center list
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Deletion Failed',
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
+      });
+      console.error('Delete error:', error);
+    }
+  };
+
+  const filteredDCs = dcList.filter((dc) => dc.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const [createForm, setCreateForm] = useState<Record<string, { roomName: string; rackNum: number; height: number }>>({});
+  const [showCreateForm, setShowCreateForm] = useState<Record<string, boolean>>({});
+
+  const handleInputChange = (dcId: string, field: string, value: string | number) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      [dcId]: {
+        ...prev[dcId],
+        [field]: field === 'rackNum' || field === 'height' ? Number(value) : value,
+      },
+    }));
+  };
+
+  const handleBuildRoom = async (dcName: string, dcId: string) => {
+  const form = createForm[dcId];
+  if (!form || !form.roomName || !form.rackNum || !form.height) {
+    toast({
+      title: 'Missing Information',
+      description: 'Please fill in all fields before submitting.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  const requestBody = {
+    fabName: dcName,
+    roomNum: 1,
+    roomArray: [
+      {
+        name: form.roomName,
+        rackNum: form.rackNum,
+        height: form.height,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Create room failed: ${response.status}`);
+    }
+
+    toast({
+      title: 'Room Created',
+      description: `Room "${form.roomName}" created in DC "${dcName}".`,
+    });
+
+    setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Creation Failed',
+      description: error instanceof Error ? error.message : 'Unknown error occurred',
+      variant: 'destructive',
+    });
+  }
+};
+
+const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
+const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
+
+const handleUpdateDC = async (dcId: string, newName: string) => {
+  if (!newName.trim()) {
+    toast({
+      title: 'Invalid Name',
+      description: 'The data center name cannot be empty.',
+      variant: 'destructive',
+    });
+    return;
+  }
+  // remove the dirst 2 letters of dcId and make it a number
+  dcId = dcId.substring(2);
+  const dcIdNum = parseInt(dcId, 10);
+  console.log('dcIdNum:', dcIdNum);
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: dcIdNum,
+        name: newName.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Update failed with status: ${response.status}`);
+    }
+
+    toast({
+      title: 'Data Center Updated',
+      description: `Successfully renamed to "${newName}".`,
+    });
+
+    // Clear edit mode and input
+    setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
+    setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
+
+    // Refresh the list
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Update Failed',
+      description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      variant: 'destructive',
+    });
+    console.error('Update error:', error);
+  }
+};
+
+
+  const HandleDeleteRoom = async (dcname: string, roomId: string) => {
+    try {
+      console.log('Delete clicked for:', roomId);
+      roomId = roomId.substring(4);
+      console.log('roomId:', roomId);
+      // remove the dirst 2 letters of dcId and make it a number
+      const roomIdNm = parseInt(roomId, 10);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/room`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fabName: dcname, roomId: roomIdNm }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Room "${roomId}" has been deleted.`,
+      });
+
+      // Refresh the data center list
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Deletion Failed',
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
+      });
+      console.error('Delete error:', error);
+    }
+  };
+
+  const [creatingRackFor, setCreatingRackFor] = useState<string | null>(null);
+  const [newRackData, setNewRackData] = useState({
+    name: '',
+    height: '',
+    service: '',
+  });
+
+  const HandleCreateRack = async (dcName: string, roomId: string, rackHeight: number) => {
+
+    roomId = roomId.substring(4);
+    const roomIdNum = parseInt(roomId, 10);
+    console.log('roomId:', roomId);
+    console.log('Creating rack for:', dcName, roomIdNum);
+    console.log('Rack data:', newRackData);
+    if (!newRackData.name || !newRackData.height || !newRackData.service) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all fields before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const rackHeightNum = parseInt(newRackData.height, 10);
+
+    if( rackHeightNum > rackHeight) {
+      console.log('Rack height exceeds room height');
+      toast({
+        title: 'Invalid Height',
+        description: `Rack height cannot exceed room height of ${rackHeight}.`,
+        variant: 'destructive',
+      });
+      setCreatingRackFor(null);
+      return;
+    }
+    const body = {
+      fabName: dcName,
+      roomId:roomIdNum,
+      rackNum: 1,
+      rackArray: [
+        {
+          name: newRackData.name,
+          height: newRackData.height,
+          service: newRackData.service,
+        },
+      ],
+    };
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/racks`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    console.log('Response:', response);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create rack');
+    }
+
+    toast({
+      title: 'Success',
+      description: `Rack "${newRackData.name}" created in Room "${roomId}"`,
+    });
+
+    // Reset
+    setCreatingRackFor(null);
+    setNewRackData({ name: '', height: '', service: '' });
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Creation Failed',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'destructive',
+    });
+  }
+};
+
+const HandleDeleteRack = async (roomId: string, rackId: string) => {
+  roomId = roomId.substring(4);
+  const roomIdNum = parseInt(roomId, 10);
+  rackId = rackId.substring(4);
+  const rackIdNum = parseInt(rackId, 10);
+  console.log('roomId:', roomIdNum);
+  console.log('Deleting rack:', rackIdNum);
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rack`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        roomId: roomIdNum,
+        rackId: rackIdNum,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to delete rack');
+    }
+
+    toast({
+      title: 'Success',
+      description: `Rack "${rackId}" deleted from Room "${roomId}".`,
+    });
+
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Deletion Failed',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'destructive',
+    });
+  }
+};
+
+
+
+
+
 
   return (
     <div className="space-y-4">
@@ -117,10 +422,6 @@ export function DataCenterList() {
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search data centers..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="h-9" />
         </div>
-        <Button variant="outline" size="sm">
-          <SlidersHorizontal className="mr-2 h-4 w-4" />
-          Filter
-        </Button>
       </div>
 
       <div className="rounded-md border">
@@ -128,79 +429,217 @@ export function DataCenterList() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Rooms</TableHead>
               <TableHead>Racks</TableHead>
               <TableHead>Servers</TableHead>
-              <TableHead>Power</TableHead>
-              <TableHead>Temp</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {filteredDCs.map((dc) => (
-              <TableRow key={dc.id}>
-                <TableCell className="font-medium">{dc.name}</TableCell>
-                <TableCell>{dc.location}</TableCell>
-                <TableCell>{getStatusBadge(dc.status)}</TableCell>
-                <TableCell>{dc.rooms}</TableCell>
-                <TableCell>{dc.racks}</TableCell>
-                <TableCell>{dc.servers}</TableCell>
-                <TableCell>{dc.power}</TableCell>
-                <TableCell>{dc.temperature}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+            {filteredDCs.map((dc) => {
+              const dcKey = dc.id;
+              const isExpanded = expanded[dcKey];
+
+              let rackCount = 0;
+              let serverCount = 0;
+              Object.values(dc.rooms).forEach((room) => {
+                rackCount += room.rackNum;
+                Object.values(room.racks).forEach((rack) => {
+                  serverCount += rack.serverNum;
+                });
+              });
+
+              return (
+                <React.Fragment key={dcKey}>
+                  <TableRow className="cursor-pointer" onClick={() => setExpanded((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}>
+                    <TableCell className="font-medium">{dc.name}</TableCell>
+                    <TableCell>{dc.roomNum}</TableCell>
+                    <TableCell>{rackCount}</TableCell>
+                    <TableCell>{serverCount}</TableCell>
+                    <TableCell className="flex items-center justify-end space-x-2 text-right">
+                      <Button 
+                        size="sm"
+                        onClick={() => setShowCreateForm((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}
+                        className="flex items-center justify-end space-x-2 text-right"
+                      >
+                        {showCreateForm[dcKey] ? 'Cancel' : 'Create Room'}
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}`} className="w-full">
-                          View Details
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}/edit`} className="w-full">
-                          Edit
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Link to={`/datacenters/${dc.id}/rooms`} className="w-full">
-                          Manage Rooms
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-500">
-                        <AlertDialog>
-                          <AlertDialogTrigger className="w-full text-left">Delete</AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this data center? This action cannot be undone and will remove all
-                                associated rooms and server configurations.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(dc.id)} className="bg-red-500 hover:bg-red-600">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                      {/* <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)} className="h-8 px-2">
+                        <Trash className="mr-1 h-4 w-4" />
+                        Delete
+                      </Button>
+                      <span>{isExpanded ? 'Collapse' : 'Expand'}</span> */}
+
+                      <TableCell className="flex flex-col items-end space-y-1 text-right">
+                        {isEditingDc[dcKey] ? (
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              className="h-8"
+                              value={editFormDc[dcKey] ?? dc.name}
+                              onChange={(e) =>
+                                setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))
+                              }
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => handleDelete(dc.name, e)}
+                            >
+                              <Trash className="mr-1 h-4 w-4" />
+                              Delete
+                            </Button>
+                            <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
+                          </div>
+                        )}
+                      </TableCell>
+
+
+
+                    </TableCell>
+                    
+
+                    {showCreateForm[dcKey] && (
+                      <div className="ml-4 mt-2 space-y-2 rounded-md border bg-muted/10 p-4 text-sm">
+                        <div className="space-y-1">
+                          <label className="block">Room Name</label>
+                          <Input
+                            value={createForm[dcKey]?.roomName || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'roomName', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block">Rack Number</label>
+                          <Input
+                            type="number"
+                            value={createForm[dcKey]?.rackNum || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'rackNum', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block">Height</label>
+                          <Input
+                            type="number"
+                            value={createForm[dcKey]?.height || ''}
+                            onChange={(e) => handleInputChange(dcKey, 'height', e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          className="mt-2"
+                          onClick={() => handleBuildRoom(dc.name, dcKey)}
+                        >
+                          Build Room
+                        </Button>
+                      </div>
+                    )}
+                  </TableRow>
+
+                  {isExpanded && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        {Object.entries(dc.rooms).map(([roomId, room]) => (
+                          <div key={roomId} className="mb-4 ml-4 border-l pl-4">
+                            
+                            <TableCell>
+                              <p className="font-semibold">Room: {room.name}</p>
+                              <p className="text-sm text-muted-foreground">Height: {room.height}</p>
+                              <p className="text-sm text-muted-foreground">Rack Number: {room.rackNum}</p>
+                              <Button
+                                className="mt-2"
+                                onClick={() => HandleDeleteRoom(dc.name, roomId)}
+                                variant="destructive"
+                                size="sm"
+                              > 
+                                delete room
+                              </Button>
+
+                              <Button
+                                className="mt-2"
+                                onClick={() =>
+                                  setCreatingRackFor((prev) => (prev === `${dc.name}-${roomId}` ? null : `${dc.name}-${roomId}`))
+                                }
+                                size="sm"
+                              >
+                                {creatingRackFor === `${dc.name}-${roomId}` ? 'Cancel' : 'Create Rack'}
+                              </Button>
+
+                              {creatingRackFor === `${dc.name}-${roomId}` && (
+                                <div className="mt-2 space-y-2">
+                                  <Input
+                                    placeholder="Rack Name"
+                                    value={newRackData.name}
+                                    onChange={(e) => setNewRackData({ ...newRackData, name: e.target.value })}
+                                  />
+                                  <Input
+                                    placeholder="Rack Height"
+                                    value={newRackData.height}
+                                    onChange={(e) => setNewRackData({ ...newRackData, height: e.target.value })}
+                                  />
+                                  <Input
+                                    placeholder="Rack Service"
+                                    value={newRackData.service}
+                                    onChange={(e) => setNewRackData({ ...newRackData, service: e.target.value })}
+                                  />
+                                  <Button onClick={() => HandleCreateRack(dc.name, roomId, room.height)}>Build</Button>
+                                </div>
+                              )}
+                            </TableCell>
+                            {Object.entries(room.racks).map(([rackId, rack]) => (
+                              <div key={rackId} className="ml-4 border-l pl-4">
+                                <div className=" font-medium">
+                                  Rack: {rack.name} height:{rack.height} (Service: {rack.service})
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="ml-2"
+                                    onClick={() => HandleDeleteRack(roomId, rackId)}
+                                  >
+                                    Delete Rack
+                                  </Button>
+                                  
+                                </div>
+                                
+                                {Object.keys(rack.servers).length > 0 ? (
+                                  <ul className="ml-4 list-disc text-sm">
+                                    {Object.entries(rack.servers).map(([serverId, server]) => (
+                                      <li key={serverId}>{server.name || `Server ${serverId}`}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="ml-4 text-sm text-muted-foreground">No servers</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
