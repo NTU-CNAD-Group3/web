@@ -18,9 +18,12 @@ import Layout from '@/layout';
 
 import DataCenters from '@/routes/datacenters/page';
 import AddDataCenter from '@/routes/datacenters/add/page';
+import Expand from '@/routes/expand/page';
 import BLayout from '@/layout-b';
 
 import './index.css';
+
+import { ApiProvider } from '@/contexts/api-context';
 
 const pageTransition = {
   initial: { opacity: 0, x: -100 },
@@ -119,6 +122,7 @@ const AnimatedRoutes = () => {
         <Route element={<BLayout />}>
           <Route path="/datacenters" element={<DataCenters />} />
           <Route path="/datacenters/add" element={<AddDataCenter />} />
+          <Route path="/expand" element={<Expand />} />
         </Route>
       </Routes>
     </AnimatePresence>
@@ -128,9 +132,11 @@ const AnimatedRoutes = () => {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <Router>
-        <AnimatedRoutes />
-      </Router>
+      <ApiProvider>
+        <Router>
+          <AnimatedRoutes />
+        </Router>
+      </ApiProvider>
     </ThemeProvider>
   </React.StrictMode>,
 );
