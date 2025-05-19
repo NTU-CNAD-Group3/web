@@ -13,20 +13,17 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
       <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
         Dashboard
       </Link>
+      <Link to="/overview" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        Overview
+      </Link>
       <Link to="/datacenters" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Data Centers
+        Operation
       </Link>
-      <Link to="/rooms" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Rooms
+      <Link to="/search" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        Search
       </Link>
-      <Link to="/servers" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Servers
-      </Link>
-      <Link to="/monitoring" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Monitoring
-      </Link>
-      <Link to="/users" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Users
+      <Link to="/expand" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        Expand
       </Link>
     </nav>
   );
