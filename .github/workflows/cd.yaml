@@ -29,6 +29,10 @@ jobs:
       - name: Build with Vite
         run: npm run build
 
+      - name: Replace .env for production
+        run: |
+          echo "VITE_API_URL=https://cnad.info" > .env
+
       - name: Setup google service account
         uses: google-github-actions/auth@v2
         with:
