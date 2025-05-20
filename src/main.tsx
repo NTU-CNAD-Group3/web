@@ -19,6 +19,7 @@ import Layout from '@/layout';
 import DataCenters from '@/routes/datacenters/page';
 import AddDataCenter from '@/routes/datacenters/add/page';
 import Expand from '@/routes/expand/page';
+import Search from '@/routes/search/page';
 import BLayout from '@/layout-b';
 
 import './index.css';
@@ -123,6 +124,7 @@ const AnimatedRoutes = () => {
           <Route path="/datacenters" element={<DataCenters />} />
           <Route path="/datacenters/add" element={<AddDataCenter />} />
           <Route path="/expand" element={<Expand />} />
+          <Route path="/search" element={<Search />} />
         </Route>
       </Routes>
     </AnimatePresence>
