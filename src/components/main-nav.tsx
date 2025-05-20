@@ -8,7 +8,7 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
     <nav className={cn('flex items-center space-x-4 lg:space-x-6', className)} {...props}>
       <Link to="/dashboard" className="flex items-center space-x-2 text-xl font-bold">
         <ServerStack className="h-6 w-6" />
-        <span>DC Manager</span>
+        <span>DataHub</span>
       </Link>
       <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
         Dashboard
