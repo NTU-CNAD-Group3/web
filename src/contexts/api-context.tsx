@@ -8,11 +8,29 @@ export interface IpPool {
   updatedat: string;
 }
 
+export interface Server {
+  id: number;
+  name: string;
+  service: string;
+  ip: string;
+  unit: number;
+  fabid: number;
+  roomid: number;
+  rackid: number;
+  ippoolid: number;
+  frontposition: number;
+  backposition: number;
+  healthy: boolean;
+  createdat: string;
+  updatedat: string;
+}
+
 export interface ApiContextValue {
   getAllIpPools: () => Promise<IpPool[]>;
   getUsedIp: (service: string) => Promise<string[]>;
   getAllIp: (service: string) => Promise<string[]>;
   createIpPool: (data: { service: string; cidrBlock: string }) => Promise<IpPool>;
+  searchServers: (keyword: string, type: string, page: number, size: number) => Promise<Server[]>;
 }
 
 const ApiContext = createContext<ApiContextValue | undefined>(undefined);
@@ -56,7 +74,20 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     return json.data;
   };
 
-  return <ApiContext.Provider value={{ getAllIpPools, getUsedIp, getAllIp, createIpPool }}>{children}</ApiContext.Provider>;
+  const searchServers = async (keyword: string, type: string, page: number, size: number) => {
+    const url = new URL(`${base}/api/v1/gateway/backend/server/searching`);
+    url.searchParams.set('keyword', keyword);
+    url.searchParams.set('type', type);
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('size', String(size));
+
+    const res = await fetch(url.toString(), { credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as { data: Server[] };
+    return json.data;
+  };
+
+  return <ApiContext.Provider value={{ getAllIpPools, getUsedIp, getAllIp, createIpPool, searchServers }}>{children}</ApiContext.Provider>;
 }
 
 export function useApi(): ApiContextValue {
