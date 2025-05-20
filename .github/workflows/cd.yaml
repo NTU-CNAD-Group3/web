@@ -26,6 +26,10 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: npm run lint
 
+      - name: Replace .env for production
+        run: |
+          echo "VITE_API_URL=https://cnad.info" > .env
+
       - name: Build with Vite
         run: npm run build
 
