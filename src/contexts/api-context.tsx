@@ -1,8 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
+export interface IpPool {
+  id: number;
+  service: string;
+  cidr: string;
+  usedips: string[];
+  createdat: string;
+  updatedat: string;
+}
+
 export interface ApiContextValue {
-  getAllIpPools: () => Promise<any[]>;
-  getUsedIp: (service: string) => Promise<any[]>;
-  createIpPool: (data: { service: string; subnet: string }) => Promise<any>;
+  getAllIpPools: () => Promise<IpPool[]>;
+  getUsedIp: (service: string) => Promise<string[]>;
+  getAllIp: (service: string) => Promise<string[]>;
+  createIpPool: (data: { service: string; cidrBlock: string }) => Promise<IpPool>;
 }
 
 const ApiContext = createContext<ApiContextValue | undefined>(undefined);
@@ -16,37 +26,37 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       credentials: 'include',
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const json = (await res.json()) as { data: IpPool[] };
+    return json.data;
   };
 
   const getUsedIp = async (service: string) => {
-    const res = await fetch(
-      `${base}/api/v1/gateway/backend/ip/usedIp?service=${encodeURIComponent(service)}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-      }
-    );
+    const res = await fetch(`${base}/api/v1/gateway/backend/ip/usedIp?service=${encodeURIComponent(service)}`, { credentials: 'include' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const json = (await res.json()) as { data: string[] };
+    return json.data;
   };
 
-  const createIpPool = async (data: { service: string; subnet: string }) => {
+  const getAllIp = async (service: string) => {
+    const res = await fetch(`${base}/api/v1/gateway/backend/ip/allIp?service=${encodeURIComponent(service)}`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as { data: string[] };
+    return json.data;
+  };
+
+  const createIpPool = async (data: { service: string; cidrBlock: string }) => {
     const res = await fetch(`${base}/api/v1/gateway/backend/ip/pool`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ service: data.service, cidrBlock: data.cidrBlock }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const json = (await res.json()) as { data: IpPool };
+    return json.data;
   };
 
-  return (
-    <ApiContext.Provider value={{ getAllIpPools, getUsedIp, createIpPool }}>
-      {children}
-    </ApiContext.Provider>
-  );
+  return <ApiContext.Provider value={{ getAllIpPools, getUsedIp, getAllIp, createIpPool }}>{children}</ApiContext.Provider>;
 }
 
 export function useApi(): ApiContextValue {
