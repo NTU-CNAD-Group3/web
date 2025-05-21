@@ -42,7 +42,7 @@ export default function RoomDetail() {
 
   const fetchRoom = async () => {
     try {
-      const res = await axios.get('http://localhost:8001/api/v1/gateway/backend/room', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rack`, {
         params: {
           name: fabName,
           roomId: roomIdNum,
