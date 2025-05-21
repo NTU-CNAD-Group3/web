@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/expand-se
 import { AlertCircle, CheckCircle, Database, Network, Server as ServerIcon, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/expand-search-ui/progress';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { DatacenterVisualization } from '@/components/datacenter-visualization';
 
 interface Rack {
   servers?: Record<string, unknown>;
@@ -241,6 +242,9 @@ export default function DashboardPage() {
             ))}
           </TabsContent>
         </Tabs>
+        <div className="mt-8">
+          <DatacenterVisualization />
+        </div>
       </main>
     </div>
   );

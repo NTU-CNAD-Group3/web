@@ -26,11 +26,36 @@ export interface Server {
   updatedat: string;
 }
 
+interface ServerPosition {
+  name: string;
+  unit?: number;
+  ip?: string;
+  healthy?: boolean;
+  position_front?: number;
+  position_back?: number;
+  serverFrontPosition?: number;
+  serverBackPosition?: number;
+}
+interface RackInfo {
+  name: string;
+  service: string;
+  height: number;
+  serverNum: number;
+  servers: Record<string, ServerPosition>;
+}
+interface RoomInfo {
+  name: string;
+  height: number;
+  maxRack: number;
+  rackNum: number;
+  racks: Record<string, RackInfo>;
+}
+
 export interface DataCenterResponse {
-  [key: string]: {
+  [dcId: string]: {
     name: string;
     roomNum: number;
-    rooms: Record<string, unknown>;
+    rooms: Record<string, RoomInfo>;
   };
 }
 
