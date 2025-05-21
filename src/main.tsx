@@ -21,6 +21,7 @@ import AddDataCenter from '@/routes/datacenters/add/page';
 import Expand from '@/routes/expand/page';
 import Search from '@/routes/search/page';
 import Dashboard from '@/routes/dashboard/page';
+import Import from '@/routes/import/page';
 import BLayout from '@/layout-b';
 
 import './index.css';
@@ -127,6 +128,7 @@ const AnimatedRoutes = () => {
           <Route path="/expand" element={<Expand />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/import" element={<Import />} />
         </Route>
       </Routes>
     </AnimatePresence>

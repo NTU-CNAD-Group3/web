@@ -103,6 +103,24 @@ export interface ApiContextValue {
   getServerDetail(id: number): Promise<Server>;
   getAllServers(): Promise<Server[]>;
   getAllBrokenServers(): Promise<Server[]>;
+  createDC(name: string): Promise<{ id: number }>;
+  createRooms(fabName: string, roomNum: number, roomArray: { name: string; rackNum: number; height: number }[]): Promise<void>;
+  createRacks(
+    fabName: string,
+    roomId: number,
+    rackNum: number,
+    rackArray: { name: string; service: string; height: number }[],
+  ): Promise<void>;
+  createServer(payload: {
+    name: string;
+    service: string;
+    unit: number;
+    fabId: number;
+    roomId: number;
+    rackId: number;
+    frontPosition: number;
+    backPosition: number;
+  }): Promise<Server>;
 }
 
 const ApiContext = createContext<ApiContextValue | undefined>(undefined);
@@ -211,6 +229,87 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     return body.data;
   }
 
+  // 1. 创建 DC
+  async function createDC(name: string): Promise<{ id: number }> {
+    const res = await fetch(`${base}/api/v1/gateway/backend/DC`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = (await res.json()) as { data: { id: number } };
+    return body.data;
+  }
+
+  // 2. 创建房间
+  async function createRooms(
+    fabName: string,
+    roomNum: number,
+    roomArray: { name: string; rackNum: number; height: number }[],
+  ): Promise<void> {
+    const res = await fetch(`${base}/api/v1/gateway/backend/rooms`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fabName, roomNum: String(roomNum), roomArray }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // 后端只返回 { message: "Created" }
+  }
+
+  // 3. 创建机架
+  async function createRacks(
+    fabName: string,
+    roomId: number,
+    rackNum: number,
+    rackArray: { name: string; service: string; height: number }[],
+  ): Promise<void> {
+    const res = await fetch(`${base}/api/v1/gateway/backend/racks`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fabName,
+        roomId, // 直接传数字
+        rackNum, // 直接传数字
+        rackArray,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  }
+
+  // 4. 上架机器
+  async function createServer(payload: {
+    name: string;
+    service: string;
+    unit: number;
+    fabId: number;
+    roomId: number;
+    rackId: number;
+    frontPosition: number;
+    backPosition: number;
+  }): Promise<Server> {
+    const res = await fetch(`${base}/api/v1/gateway/backend/server`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: payload.name,
+        service: payload.service,
+        unit: payload.unit, // 直接传数字
+        fabId: payload.fabId, // 直接传数字
+        roomId: payload.roomId, // 直接传数字
+        rackId: payload.rackId, // 直接传数字
+        frontPosition: payload.frontPosition, // 直接传数字
+        backPosition: payload.backPosition, // 直接传数字
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = (await res.json()) as { data: Server };
+    return body.data;
+  }
+
   return (
     <ApiContext.Provider
       value={{
@@ -226,6 +325,10 @@ export function ApiProvider({ children }: { children: ReactNode }) {
         getServerDetail,
         getAllServers,
         getAllBrokenServers,
+        createDC,
+        createRooms,
+        createRacks,
+        createServer,
       }}
     >
       {children}

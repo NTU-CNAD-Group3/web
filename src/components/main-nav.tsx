@@ -2,6 +2,7 @@ import type React from 'react';
 import { Link } from '@/components/link';
 import { cn } from '@/lib/utils';
 import { ServerIcon as ServerStack } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
@@ -24,6 +25,10 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
       </Link>
       <Link to="/expand" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
         Expand
+      </Link>
+      <Link to="/import" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        <Upload className="mr-1 h-3 w-3" />
+        Import
       </Link>
     </nav>
   );
