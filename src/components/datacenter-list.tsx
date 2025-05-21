@@ -5,7 +5,7 @@ import { Input } from '@/components/external-ui/input';
 import { Search, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/external-ui/button';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 type Server = {
   name?: string;
@@ -76,6 +76,7 @@ export function DataCenterList() {
 
   useEffect(() => {
     fetchDataCenters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = async (dcName: string, e: React.MouseEvent) => {
@@ -143,113 +144,112 @@ export function DataCenterList() {
   };
 
   const handleBuildRoom = async (dcName: string, dcId: string) => {
-  const form = createForm[dcId];
-  if (!form || !form.roomName || !form.rackNum || !form.height) {
-    toast({
-      title: 'Missing Information',
-      description: 'Please fill in all fields before submitting.',
-      variant: 'destructive',
-    });
-    return;
-  }
+    const form = createForm[dcId];
+    if (!form || !form.roomName || !form.rackNum || !form.height) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all fields before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  const requestBody = {
-    fabName: dcName,
-    roomNum: 1,
-    roomArray: [
-      {
-        name: form.roomName,
-        rackNum: form.rackNum,
-        height: form.height,
-      },
-    ],
+    const requestBody = {
+      fabName: dcName,
+      roomNum: 1,
+      roomArray: [
+        {
+          name: form.roomName,
+          rackNum: form.rackNum,
+          height: form.height,
+        },
+      ],
+    };
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Create room failed: ${response.status}`);
+      }
+
+      toast({
+        title: 'Room Created',
+        description: `Room "${form.roomName}" created in DC "${dcName}".`,
+      });
+
+      setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Creation Failed',
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: 'destructive',
+      });
+    }
   };
 
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+  const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
+  const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
 
-    if (!response.ok) {
-      throw new Error(`Create room failed: ${response.status}`);
+  const handleUpdateDC = async (dcId: string, newName: string) => {
+    if (!newName.trim()) {
+      toast({
+        title: 'Invalid Name',
+        description: 'The data center name cannot be empty.',
+        variant: 'destructive',
+      });
+      return;
     }
+    // remove the dirst 2 letters of dcId and make it a number
+    dcId = dcId.substring(2);
+    const dcIdNum = parseInt(dcId, 10);
+    console.log('dcIdNum:', dcIdNum);
 
-    toast({
-      title: 'Room Created',
-      description: `Room "${form.roomName}" created in DC "${dcName}".`,
-    });
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: dcIdNum,
+          name: newName.trim(),
+        }),
+      });
 
-    setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
-    fetchDataCenters();
-  } catch (error) {
-    toast({
-      title: 'Creation Failed',
-      description: error instanceof Error ? error.message : 'Unknown error occurred',
-      variant: 'destructive',
-    });
-  }
-};
+      if (!response.ok) {
+        throw new Error(`Update failed with status: ${response.status}`);
+      }
 
-const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
-const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
+      toast({
+        title: 'Data Center Updated',
+        description: `Successfully renamed to "${newName}".`,
+      });
 
-const handleUpdateDC = async (dcId: string, newName: string) => {
-  if (!newName.trim()) {
-    toast({
-      title: 'Invalid Name',
-      description: 'The data center name cannot be empty.',
-      variant: 'destructive',
-    });
-    return;
-  }
-  // remove the dirst 2 letters of dcId and make it a number
-  dcId = dcId.substring(2);
-  const dcIdNum = parseInt(dcId, 10);
-  console.log('dcIdNum:', dcIdNum);
+      // Clear edit mode and input
+      setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
+      setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
 
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: dcIdNum,
-        name: newName.trim(),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Update failed with status: ${response.status}`);
+      // Refresh the list
+      fetchDataCenters();
+    } catch (error) {
+      toast({
+        title: 'Update Failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        variant: 'destructive',
+      });
+      console.error('Update error:', error);
     }
-
-    toast({
-      title: 'Data Center Updated',
-      description: `Successfully renamed to "${newName}".`,
-    });
-
-    // Clear edit mode and input
-    setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
-    setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
-
-    // Refresh the list
-    fetchDataCenters();
-  } catch (error) {
-    toast({
-      title: 'Update Failed',
-      description: error instanceof Error ? error.message : 'An unknown error occurred.',
-      variant: 'destructive',
-    });
-    console.error('Update error:', error);
-  }
-};
-
+  };
 
   const HandleDeleteRoom = async (dcname: string, roomId: string) => {
     try {
@@ -333,7 +333,7 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                     <TableCell>{rackCount}</TableCell>
                     <TableCell>{serverCount}</TableCell>
                     <TableCell className="flex items-center justify-end space-x-2 text-right">
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => setShowCreateForm((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}
                         className="flex items-center justify-end space-x-2 text-right"
@@ -352,37 +352,21 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                             <Input
                               className="h-8"
                               value={editFormDc[dcKey] ?? dc.name}
-                              onChange={(e) =>
-                                setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))
-                              }
+                              onChange={(e) => setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))}
                             />
-                            <Button
-                              size="sm"
-                              onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}
-                            >
+                            <Button size="sm" onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}>
                               Save
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}>
                               Cancel
                             </Button>
                           </div>
                         ) : (
                           <div className="flex items-center space-x-2">
-                            <Button
-                              size="sm"
-                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}
-                            >
+                            <Button size="sm" onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}>
                               Edit
                             </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={(e) => handleDelete(dc.name, e)}
-                            >
+                            <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)}>
                               <Trash className="mr-1 h-4 w-4" />
                               Delete
                             </Button>
@@ -390,11 +374,7 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                           </div>
                         )}
                       </TableCell>
-
-
-
                     </TableCell>
-                    
 
                     {showCreateForm[dcKey] && (
                       <div className="ml-4 mt-2 space-y-2 rounded-md border bg-muted/10 p-4 text-sm">
@@ -421,10 +401,7 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                             onChange={(e) => handleInputChange(dcKey, 'height', e.target.value)}
                           />
                         </div>
-                        <Button
-                          className="mt-2"
-                          onClick={() => handleBuildRoom(dc.name, dcKey)}
-                        >
+                        <Button className="mt-2" onClick={() => handleBuildRoom(dc.name, dcKey)}>
                           Build Room
                         </Button>
                       </div>
@@ -440,19 +417,13 @@ const handleUpdateDC = async (dcId: string, newName: string) => {
                               <p className="font-semibold">Room: {room.name}</p>
                               <p className="text-sm text-muted-foreground">Height: {room.height}</p>
                               <p className="text-sm text-muted-foreground">Rack Number: {room.rackNum}</p>
-                              <Button
-                                className="mt-2"
-                                onClick={() => HandleDeleteRoom(dc.name, roomId)}
-                                variant="destructive"
-                                size="sm"
-                              > 
+                              <Button className="mt-2" onClick={() => HandleDeleteRoom(dc.name, roomId)} variant="destructive" size="sm">
                                 delete room
                               </Button>
-                              
-                              <Button className="mt-2 mr-7" onClick={() => navigate(`/room/${dc.name}/${roomId}`)}
-                                 size="sm">
+
+                              <Button className="mr-7 mt-2" onClick={() => navigate(`/room/${dc.name}/${roomId}`)} size="sm">
                                 view details
-                              </Button >
+                              </Button>
                             </TableCell>
                           </div>
                         ))}

@@ -132,7 +132,6 @@ const AnimatedRoutes = () => {
           <Route path="/import" element={<Import />} />
         </Route>
         <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
-        
       </Routes>
     </AnimatePresence>
   );

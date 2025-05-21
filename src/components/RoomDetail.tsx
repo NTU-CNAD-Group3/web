@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import RackGrid from "./Rackgrid"
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import RackGrid from './Rackgrid';
 import { useToast } from '@/hooks/use-toast';
-import axios from "axios";
+import axios from 'axios';
 
 interface Server {
   id: number;
@@ -34,16 +34,15 @@ interface RoomData {
 export default function RoomDetail() {
   const { fabName, roomId } = useParams();
   const [roomData, setRoomData] = useState<RoomData | null>(null);
-  const roomIdNum = roomId ? parseInt(roomId.replace(/\D/g, ""), 10) : NaN;
+  const roomIdNum = roomId ? parseInt(roomId.replace(/\D/g, ''), 10) : NaN;
   const { toast } = useToast();
 
   const [newRackData, setNewRackData] = useState({ name: '', height: '', service: '' });
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-
   const fetchRoom = async () => {
     try {
-      const res = await axios.get("http://localhost:8001/api/v1/gateway/backend/room", {
+      const res = await axios.get('http://localhost:8001/api/v1/gateway/backend/room', {
         params: {
           name: fabName,
           roomId: roomIdNum,
@@ -53,12 +52,13 @@ export default function RoomDetail() {
       setRoomData(res.data.data);
       console.log(res.data.data);
     } catch (error) {
-      console.error("Failed to fetch room data", error);
+      console.error('Failed to fetch room data', error);
     }
   };
 
   useEffect(() => {
     fetchRoom();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabName, roomId]);
 
   const HandleDeleteRack = async (roomId: string, rackId: number) => {
@@ -173,7 +173,7 @@ export default function RoomDetail() {
   if (!roomData) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4 p-6">
       <h1 className="text-2xl font-bold">Room: {roomData.name}</h1>
       <p>Room ID: {roomData.id}</p>
       <p>Total Racks: {roomData.maxRack}</p>
@@ -184,39 +184,39 @@ export default function RoomDetail() {
           onClick={() => {
             setShowCreateForm(!showCreateForm);
           }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
-          {showCreateForm ? "Cancel" : "Create Rack"}
+          {showCreateForm ? 'Cancel' : 'Create Rack'}
         </button>
 
         {showCreateForm && (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <input
               type="text"
               placeholder="Rack Name"
               value={newRackData.name}
               onChange={(e) => setNewRackData({ ...newRackData, name: e.target.value })}
-              className="border px-3 py-2 rounded"
+              className="rounded border px-3 py-2"
             />
             <input
               type="number"
               placeholder="Rack Height"
               value={newRackData.height}
               onChange={(e) => setNewRackData({ ...newRackData, height: e.target.value })}
-              className="border px-3 py-2 rounded"
+              className="rounded border px-3 py-2"
             />
             <input
               type="text"
               placeholder="Rack Service"
               value={newRackData.service}
               onChange={(e) => setNewRackData({ ...newRackData, service: e.target.value })}
-              className="border px-3 py-2 rounded"
+              className="rounded border px-3 py-2"
             />
             <button
               onClick={() => {
                 HandleCreateRack(fabName!, roomId!, roomData.height);
               }}
-              className="col-span-1 sm:col-span-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="col-span-1 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 sm:col-span-3"
             >
               Submit Rack
             </button>
@@ -224,10 +224,7 @@ export default function RoomDetail() {
         )}
       </div>
 
-      <RackGrid
-        roomData={roomData}
-        onDeleteRack={(rackId) => HandleDeleteRack(`room${roomData.id}`, rackId)}
-      />
+      <RackGrid roomData={roomData} onDeleteRack={(rackId) => HandleDeleteRack(`room${roomData.id}`, rackId)} />
     </div>
   );
 }

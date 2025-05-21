@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface Server {
   id: number;
@@ -36,7 +36,7 @@ const RackGrid: React.FC<RackGridProps> = ({ roomData, onDeleteRack }) => {
   const { maxRack, height: roomHeight, racks } = roomData;
 
   return (
-    <div className="flex gap-4 overflow-x-auto mt-4">
+    <div className="mt-4 flex gap-4 overflow-x-auto">
       {Array.from({ length: maxRack }).map((_, rackIndex) => {
         const rackKey = Object.keys(racks)[rackIndex];
         const rack = racks[rackKey];
@@ -45,8 +45,8 @@ const RackGrid: React.FC<RackGridProps> = ({ roomData, onDeleteRack }) => {
           const reverseIndex = roomHeight - 1 - pos;
 
           // Default cell
-          let label = "";
-          let color = "bg-white";
+          let label = '';
+          let color = 'bg-white';
 
           // If rack exists for this index
           if (rack) {
@@ -54,26 +54,22 @@ const RackGrid: React.FC<RackGridProps> = ({ roomData, onDeleteRack }) => {
 
             // Unusable space
             if (reverseIndex >= rackHeight) {
-              color = "bg-black";
+              color = 'bg-black';
             }
 
             // Find a server occupying this position
-            const server = Object.values(rack.servers).find(
-              (srv) =>
-                reverseIndex >= srv.frontPosition &&
-                reverseIndex <= srv.backPosition
-            );
+            const server = Object.values(rack.servers).find((srv) => reverseIndex >= srv.frontPosition && reverseIndex <= srv.backPosition);
 
             if (server) {
               label = server.name;
-              color = server.healthy ? "bg-green-400" : "bg-red-400";
+              color = server.healthy ? 'bg-green-400' : 'bg-red-400';
             }
           }
 
           return (
             <div
               key={reverseIndex}
-              className={`w-16 h-16 border border-gray-400 text-xs text-center flex items-center justify-center ${color}`}
+              className={`flex h-16 w-16 items-center justify-center border border-gray-400 text-center text-xs ${color}`}
             >
               {label}
             </div>
@@ -87,16 +83,14 @@ const RackGrid: React.FC<RackGridProps> = ({ roomData, onDeleteRack }) => {
               onClick={() => {
                 if (rack && onDeleteRack) onDeleteRack(rack.id);
               }}
-              className="mb-1 bg-red-500 text-white px-2 py-1 rounded text-xs"
+              className="mb-1 rounded bg-red-500 px-2 py-1 text-xs text-white"
               disabled={!rack}
             >
               Delete
             </button>
 
             {/* Rack Label */}
-            <div className="text-sm font-semibold mb-1">
-              {rack ? rack.service : "Empty"}
-            </div>
+            <div className="mb-1 text-sm font-semibold">{rack ? rack.service : 'Empty'}</div>
 
             {/* Column of Cells */}
             <div className="flex flex-col">{rackCells}</div>
