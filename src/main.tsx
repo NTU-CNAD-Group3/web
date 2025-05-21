@@ -29,6 +29,7 @@ import Servers from '@/routes/servers/page';
 import AddServer from '@/routes/servers/add/page';
 import Users from '@/routes/users/page';
 import BLayout from '@/layout-b';
+import RoomDetail from '@/components/RoomDetail';
 
 import './index.css';
 
@@ -140,6 +141,8 @@ const AnimatedRoutes = () => {
           <Route path="/servers/add" element={<AddServer />} />
           <Route path="/users" element={<Users />} />
         </Route>
+
+        <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
       </Routes>
     </AnimatePresence>
   );
