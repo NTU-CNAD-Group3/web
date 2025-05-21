@@ -154,7 +154,7 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ service: data.service, cidr: data.cidrBlock }),
+      body: JSON.stringify({ service: data.service, cidrBlock: data.cidrBlock }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const body = (await res.json()) as { data: IpPool };
