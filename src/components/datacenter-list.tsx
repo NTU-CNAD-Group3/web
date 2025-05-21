@@ -1,10 +1,11 @@
 import React from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/external-ui/table';
 import { Input } from '@/components/external-ui/input';
 import { Search, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/external-ui/button';
+import { useNavigate } from "react-router-dom";
 
 type Server = {
   name?: string;
@@ -38,7 +39,7 @@ export function DataCenterList() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const fetchDataCenters = useCallback(async () => {
+  const fetchDataCenters = async () => {
     console.log('Session:', sessionStorage.getItem('session'));
 
     try {
@@ -46,7 +47,10 @@ export function DataCenterList() {
         method: 'GET',
         credentials: 'include',
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,11 +72,11 @@ export function DataCenterList() {
       });
       console.error('Fetch error:', error);
     }
-  }, [toast]);
+  };
 
   useEffect(() => {
     fetchDataCenters();
-  }, [fetchDataCenters]);
+  }, []);
 
   const handleDelete = async (dcName: string, e: React.MouseEvent) => {
     // Stop the click event from bubbling up to parent elements (row expansion)
@@ -139,112 +143,113 @@ export function DataCenterList() {
   };
 
   const handleBuildRoom = async (dcName: string, dcId: string) => {
-    const form = createForm[dcId];
-    if (!form || !form.roomName || !form.rackNum || !form.height) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all fields before submitting.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const form = createForm[dcId];
+  if (!form || !form.roomName || !form.rackNum || !form.height) {
+    toast({
+      title: 'Missing Information',
+      description: 'Please fill in all fields before submitting.',
+      variant: 'destructive',
+    });
+    return;
+  }
 
-    const requestBody = {
-      fabName: dcName,
-      roomNum: 1,
-      roomArray: [
-        {
-          name: form.roomName,
-          rackNum: form.rackNum,
-          height: form.height,
-        },
-      ],
-    };
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Create room failed: ${response.status}`);
-      }
-
-      toast({
-        title: 'Room Created',
-        description: `Room "${form.roomName}" created in DC "${dcName}".`,
-      });
-
-      setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
-      fetchDataCenters();
-    } catch (error) {
-      toast({
-        title: 'Creation Failed',
-        description: error instanceof Error ? error.message : 'Unknown error occurred',
-        variant: 'destructive',
-      });
-    }
+  const requestBody = {
+    fabName: dcName,
+    roomNum: 1,
+    roomArray: [
+      {
+        name: form.roomName,
+        rackNum: form.rackNum,
+        height: form.height,
+      },
+    ],
   };
 
-  const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
-  const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rooms`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-  const handleUpdateDC = async (dcId: string, newName: string) => {
-    if (!newName.trim()) {
-      toast({
-        title: 'Invalid Name',
-        description: 'The data center name cannot be empty.',
-        variant: 'destructive',
-      });
-      return;
+    if (!response.ok) {
+      throw new Error(`Create room failed: ${response.status}`);
     }
-    // remove the dirst 2 letters of dcId and make it a number
-    dcId = dcId.substring(2);
-    const dcIdNum = parseInt(dcId, 10);
-    console.log('dcIdNum:', dcIdNum);
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: dcIdNum,
-          name: newName.trim(),
-        }),
-      });
+    toast({
+      title: 'Room Created',
+      description: `Room "${form.roomName}" created in DC "${dcName}".`,
+    });
 
-      if (!response.ok) {
-        throw new Error(`Update failed with status: ${response.status}`);
-      }
+    setShowCreateForm((prev) => ({ ...prev, [dcId]: false }));
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Creation Failed',
+      description: error instanceof Error ? error.message : 'Unknown error occurred',
+      variant: 'destructive',
+    });
+  }
+};
 
-      toast({
-        title: 'Data Center Updated',
-        description: `Successfully renamed to "${newName}".`,
-      });
+const [editFormDc, setEditFormDc] = useState<Record<string, string>>({});
+const [isEditingDc, setIsEditingDc] = useState<Record<string, boolean>>({});
 
-      // Clear edit mode and input
-      setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
-      setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
+const handleUpdateDC = async (dcId: string, newName: string) => {
+  if (!newName.trim()) {
+    toast({
+      title: 'Invalid Name',
+      description: 'The data center name cannot be empty.',
+      variant: 'destructive',
+    });
+    return;
+  }
+  // remove the dirst 2 letters of dcId and make it a number
+  dcId = dcId.substring(2);
+  const dcIdNum = parseInt(dcId, 10);
+  console.log('dcIdNum:', dcIdNum);
 
-      // Refresh the list
-      fetchDataCenters();
-    } catch (error) {
-      toast({
-        title: 'Update Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred.',
-        variant: 'destructive',
-      });
-      console.error('Update error:', error);
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: dcIdNum,
+        name: newName.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Update failed with status: ${response.status}`);
     }
-  };
+
+    toast({
+      title: 'Data Center Updated',
+      description: `Successfully renamed to "${newName}".`,
+    });
+
+    // Clear edit mode and input
+    setIsEditingDc((prev) => ({ ...prev, [dcId]: false }));
+    setEditFormDc((prev) => ({ ...prev, [dcId]: '' }));
+
+    // Refresh the list
+    fetchDataCenters();
+  } catch (error) {
+    toast({
+      title: 'Update Failed',
+      description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      variant: 'destructive',
+    });
+    console.error('Update error:', error);
+  }
+};
+
 
   const HandleDeleteRoom = async (dcname: string, roomId: string) => {
     try {
@@ -283,127 +288,7 @@ export function DataCenterList() {
     }
   };
 
-  const [creatingRackFor, setCreatingRackFor] = useState<string | null>(null);
-  const [newRackData, setNewRackData] = useState({
-    name: '',
-    height: '',
-    service: '',
-  });
-
-  const HandleCreateRack = async (dcName: string, roomId: string, rackHeight: number) => {
-    roomId = roomId.substring(4);
-    const roomIdNum = parseInt(roomId, 10);
-    console.log('roomId:', roomId);
-    console.log('Creating rack for:', dcName, roomIdNum);
-    console.log('Rack data:', newRackData);
-    if (!newRackData.name || !newRackData.height || !newRackData.service) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all fields before submitting.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    const rackHeightNum = parseInt(newRackData.height, 10);
-
-    if (rackHeightNum > rackHeight) {
-      console.log('Rack height exceeds room height');
-      toast({
-        title: 'Invalid Height',
-        description: `Rack height cannot exceed room height of ${rackHeight}.`,
-        variant: 'destructive',
-      });
-      setCreatingRackFor(null);
-      return;
-    }
-    const body = {
-      fabName: dcName,
-      roomId: roomIdNum,
-      rackNum: 1,
-      rackArray: [
-        {
-          name: newRackData.name,
-          height: newRackData.height,
-          service: newRackData.service,
-        },
-      ],
-    };
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/racks`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      console.log('Response:', response);
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to create rack');
-      }
-
-      toast({
-        title: 'Success',
-        description: `Rack "${newRackData.name}" created in Room "${roomId}"`,
-      });
-
-      // Reset
-      setCreatingRackFor(null);
-      setNewRackData({ name: '', height: '', service: '' });
-      fetchDataCenters();
-    } catch (error) {
-      toast({
-        title: 'Creation Failed',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const HandleDeleteRack = async (roomId: string, rackId: string) => {
-    roomId = roomId.substring(4);
-    const roomIdNum = parseInt(roomId, 10);
-    rackId = rackId.substring(4);
-    const rackIdNum = parseInt(rackId, 10);
-    console.log('roomId:', roomIdNum);
-    console.log('Deleting rack:', rackIdNum);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/rack`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roomId: roomIdNum,
-          rackId: rackIdNum,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to delete rack');
-      }
-
-      toast({
-        title: 'Success',
-        description: `Rack "${rackId}" deleted from Room "${roomId}".`,
-      });
-
-      fetchDataCenters();
-    } catch (error) {
-      toast({
-        title: 'Deletion Failed',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive',
-      });
-    }
-  };
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
@@ -448,7 +333,7 @@ export function DataCenterList() {
                     <TableCell>{rackCount}</TableCell>
                     <TableCell>{serverCount}</TableCell>
                     <TableCell className="flex items-center justify-end space-x-2 text-right">
-                      <Button
+                      <Button 
                         size="sm"
                         onClick={() => setShowCreateForm((prev) => ({ ...prev, [dcKey]: !prev[dcKey] }))}
                         className="flex items-center justify-end space-x-2 text-right"
@@ -467,21 +352,37 @@ export function DataCenterList() {
                             <Input
                               className="h-8"
                               value={editFormDc[dcKey] ?? dc.name}
-                              onChange={(e) => setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))}
+                              onChange={(e) =>
+                                setEditFormDc((prev) => ({ ...prev, [dcKey]: e.target.value }))
+                              }
                             />
-                            <Button size="sm" onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}>
+                            <Button
+                              size="sm"
+                              onClick={() => handleUpdateDC(dc.id, editFormDc[dcKey] ?? dc.name)}
+                            >
                               Save
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: false }))}
+                            >
                               Cancel
                             </Button>
                           </div>
                         ) : (
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}>
+                            <Button
+                              size="sm"
+                              onClick={() => setIsEditingDc((prev) => ({ ...prev, [dcKey]: true }))}
+                            >
                               Edit
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={(e) => handleDelete(dc.name, e)}>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => handleDelete(dc.name, e)}
+                            >
                               <Trash className="mr-1 h-4 w-4" />
                               Delete
                             </Button>
@@ -489,7 +390,11 @@ export function DataCenterList() {
                           </div>
                         )}
                       </TableCell>
+
+
+
                     </TableCell>
+                    
 
                     {showCreateForm[dcKey] && (
                       <div className="ml-4 mt-2 space-y-2 rounded-md border bg-muted/10 p-4 text-sm">
@@ -516,7 +421,10 @@ export function DataCenterList() {
                             onChange={(e) => handleInputChange(dcKey, 'height', e.target.value)}
                           />
                         </div>
-                        <Button className="mt-2" onClick={() => handleBuildRoom(dc.name, dcKey)}>
+                        <Button
+                          className="mt-2"
+                          onClick={() => handleBuildRoom(dc.name, dcKey)}
+                        >
                           Build Room
                         </Button>
                       </div>
@@ -528,65 +436,24 @@ export function DataCenterList() {
                       <TableCell colSpan={5}>
                         {Object.entries(dc.rooms).map(([roomId, room]) => (
                           <div key={roomId} className="mb-4 ml-4 border-l pl-4">
-                            <TableCell>
+                            <TableCell className="flex flex-col items-start space-y-2">
                               <p className="font-semibold">Room: {room.name}</p>
                               <p className="text-sm text-muted-foreground">Height: {room.height}</p>
                               <p className="text-sm text-muted-foreground">Rack Number: {room.rackNum}</p>
-                              <Button className="mt-2" onClick={() => HandleDeleteRoom(dc.name, roomId)} variant="destructive" size="sm">
-                                delete room
-                              </Button>
-
                               <Button
                                 className="mt-2"
-                                onClick={() =>
-                                  setCreatingRackFor((prev) => (prev === `${dc.name}-${roomId}` ? null : `${dc.name}-${roomId}`))
-                                }
+                                onClick={() => HandleDeleteRoom(dc.name, roomId)}
+                                variant="destructive"
                                 size="sm"
-                              >
-                                {creatingRackFor === `${dc.name}-${roomId}` ? 'Cancel' : 'Create Rack'}
+                              > 
+                                delete room
                               </Button>
-
-                              {creatingRackFor === `${dc.name}-${roomId}` && (
-                                <div className="mt-2 space-y-2">
-                                  <Input
-                                    placeholder="Rack Name"
-                                    value={newRackData.name}
-                                    onChange={(e) => setNewRackData({ ...newRackData, name: e.target.value })}
-                                  />
-                                  <Input
-                                    placeholder="Rack Height"
-                                    value={newRackData.height}
-                                    onChange={(e) => setNewRackData({ ...newRackData, height: e.target.value })}
-                                  />
-                                  <Input
-                                    placeholder="Rack Service"
-                                    value={newRackData.service}
-                                    onChange={(e) => setNewRackData({ ...newRackData, service: e.target.value })}
-                                  />
-                                  <Button onClick={() => HandleCreateRack(dc.name, roomId, room.height)}>Build</Button>
-                                </div>
-                              )}
+                              
+                              <Button className="mt-2 mr-7" onClick={() => navigate(`/room/${dc.name}/${roomId}`)}
+                                 size="sm">
+                                view details
+                              </Button >
                             </TableCell>
-                            {Object.entries(room.racks).map(([rackId, rack]) => (
-                              <div key={rackId} className="ml-4 border-l pl-4">
-                                <div className="font-medium">
-                                  Rack: {rack.name} height:{rack.height} (Service: {rack.service})
-                                  <Button variant="destructive" size="sm" className="ml-2" onClick={() => HandleDeleteRack(roomId, rackId)}>
-                                    Delete Rack
-                                  </Button>
-                                </div>
-
-                                {Object.keys(rack.servers).length > 0 ? (
-                                  <ul className="ml-4 list-disc text-sm">
-                                    {Object.entries(rack.servers).map(([serverId, server]) => (
-                                      <li key={serverId}>{server.name || `Server ${serverId}`}</li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p className="ml-4 text-sm text-muted-foreground">No servers</p>
-                                )}
-                              </div>
-                            ))}
                           </div>
                         ))}
                       </TableCell>

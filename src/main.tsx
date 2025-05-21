@@ -23,6 +23,7 @@ import Search from '@/routes/search/page';
 import Dashboard from '@/routes/dashboard/page';
 import Import from '@/routes/import/page';
 import BLayout from '@/layout-b';
+import RoomDetail from '@/components/RoomDetail';
 
 import './index.css';
 
@@ -130,6 +131,8 @@ const AnimatedRoutes = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/import" element={<Import />} />
         </Route>
+        <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
+        
       </Routes>
     </AnimatePresence>
   );
