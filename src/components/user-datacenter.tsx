@@ -119,8 +119,7 @@ export function UserDataCenter() {
     }
 
     // Find the room ID by matching the selected room name with room.name
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const roomEntry = Object.entries(selectedDc.rooms).find(([roomId, room]) => room.name === selectedRoomName);
+    const roomEntry = Object.entries(selectedDc.rooms).find(([, room]) => room.name === selectedRoomName);
 
     if (!roomEntry) {
       toast({
