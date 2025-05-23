@@ -30,10 +30,26 @@ interface RoomData {
   height: number;
   racks: Record<string, Rack>;
 }
+interface FabData {
+  id: number;
+  name: string;
+  roomNum: number;
+  cretedAt: string;
+  updatedAt: string;
+  rooms: Record<string, RoomData>;
+}
 
 export default function RoomDetailUser() {
   const { fabId, fabName, roomId } = useParams();
   const [roomData, setRoomData] = useState<RoomData | null>(null);
+  const [fabData, setFabData] = useState<FabData>({
+    id: fabId ? parseInt(fabId.replace(/\D/g, ''), 10) : NaN,
+    name: '',
+    roomNum: 0,
+    cretedAt: '',
+    updatedAt: '',
+    rooms: {},
+  });
   const roomIdNum = roomId ? parseInt(roomId.replace(/\D/g, ''), 10) : NaN;
   const fabIdNum = fabId ? parseInt(fabId.replace(/\D/g, ''), 10) : NaN;
   const { toast } = useToast();
@@ -57,6 +73,120 @@ export default function RoomDetailUser() {
     fetchRoom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabName, roomId]);
+
+  const fetchFabData = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/DC`, {
+        params: { name: fabName },
+        withCredentials: true,
+      });
+      console.log('Fab Data:', response.data.data);
+      setFabData(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch fab data', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFabData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fabName]);
+
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [updateData, setUpdateData] = useState({
+    id: 0,
+    newFabId: fabIdNum,
+    newRoomId: '',
+    newRackId: '',
+    service: '',
+    unit: 0,
+    frontPosition: '',
+    backPosition: '',
+  });
+  const handleUpdateClick = (server: Server, rack: Rack) => {
+    setUpdateData({
+      id: server.id,
+      newFabId: fabIdNum,
+      newRoomId: roomIdNum.toString(),
+      newRackId: rack.id.toString(),
+      service: rack.service,
+      unit: server.unit,
+      frontPosition: server.frontPosition.toString(),
+      backPosition: server.backPosition.toString(),
+    });
+    setShowUpdateForm(true);
+  };
+
+  const handleUpdateServer = async () => {
+    if (!updateData.newRoomId || !updateData.newRackId || updateData.frontPosition === '' || updateData.backPosition === '') {
+      toast({
+        title: 'Missing Fields',
+        description: 'Please fill in all fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const front = parseInt(updateData.frontPosition, 10);
+    const back = parseInt(updateData.backPosition, 10);
+    console.log('Front:', front);
+    console.log('Back:', back);
+    if (back < front) {
+      toast({
+        title: 'Invalid Positions',
+        description: 'Back position must be >= front position.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (back - front + 1 !== updateData.unit) {
+      toast({
+        title: 'Invalid Unit',
+        description: 'Unit must be equal to back - front + 1.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const payload = {
+      id: updateData.id,
+      unit: back - front + 1,
+      newFabId: updateData.newFabId,
+      newRoomId: updateData.newRoomId,
+      newRackId: updateData.newRackId,
+      frontPosition: front,
+      backPosition: back,
+      service: updateData.service,
+    };
+    console.log('Payload:', payload);
+
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/server`, payload, {
+        withCredentials: true,
+      });
+      toast({
+        title: 'Server Updated',
+        description: `Server "${payload.id}" updated successfully.`,
+      });
+      fetchRoom();
+      setShowUpdateForm(false);
+      setUpdateData({
+        id: 0,
+        newFabId: fabIdNum,
+        newRoomId: '',
+        newRackId: '',
+        service: '',
+        unit: 0,
+        frontPosition: '',
+        backPosition: '',
+      });
+    } catch (err) {
+      console.log('Error:', err);
+      toast({
+        title: 'Update Failed',
+        description: 'Unable to update server.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const [showServerForm, setShowServerForm] = useState(false);
   const [serverData, setServerData] = useState({
@@ -169,8 +299,6 @@ export default function RoomDetailUser() {
   return (
     <div className="space-y-4 p-6">
       <h1 className="text-2xl font-bold">Room: {roomData.name}</h1>
-      <p> roomId : {fabId}</p>
-      <p>Room ID: {roomData.id}</p>
       <p>Total Racks: {roomData.maxRack}</p>
       <p>Racks can use: {roomData.hasRack}</p>
 
@@ -253,6 +381,7 @@ export default function RoomDetailUser() {
               <th className="border px-4 py-2">Health</th>
               <th className="border px-4 py-2">status</th>
               <th className="border px-4 py-2">Delete</th>
+              <th className="border px-4 py-2">update</th>
             </tr>
           </thead>
           <tbody>
@@ -318,12 +447,78 @@ export default function RoomDetailUser() {
                       Delete
                     </button>
                   </td>
+                  <td className="border px-4 py-2">
+                    <button
+                      onClick={() => handleUpdateClick(server, rack)}
+                      className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
+                    >
+                      Update
+                    </button>
+                  </td>
                 </tr>
               )),
             )}
           </tbody>
         </table>
       </div>
+
+      {showUpdateForm && (
+        <div className="mt-4 w-full max-w-lg space-y-4 rounded border p-4 shadow">
+          <h2 className="text-xl font-bold">Update Server</h2>
+          <input
+            className="w-full border p-2"
+            placeholder="Front Position"
+            type="number"
+            value={updateData.frontPosition}
+            onChange={(e) => setUpdateData({ ...updateData, frontPosition: e.target.value })}
+          />
+          <input
+            className="w-full border p-2"
+            placeholder="Back Position"
+            type="number"
+            value={updateData.backPosition}
+            onChange={(e) => setUpdateData({ ...updateData, backPosition: e.target.value })}
+          />
+          <select
+            className="w-full border p-2"
+            value={updateData.newRoomId}
+            onChange={(e) => setUpdateData({ ...updateData, newRoomId: e.target.value, newRackId: '' })}
+          >
+            <option value="">Select Room</option>
+            {Object.values(fabData.rooms)
+              .filter((room) => Object.values(room.racks).some((rack) => rack.service === updateData.service))
+              .map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
+                </option>
+              ))}
+          </select>
+          <select
+            className="w-full border p-2"
+            value={updateData.newRackId}
+            onChange={(e) => setUpdateData({ ...updateData, newRackId: e.target.value })}
+            disabled={!updateData.newRoomId}
+          >
+            <option value="">Select Rack</option>
+            {updateData.newRoomId &&
+              (() => {
+                const roomEntry = Object.entries(fabData?.rooms || {}).find(([, room]) => room.id === Number(updateData.newRoomId));
+                const racks = roomEntry?.[1]?.racks || {};
+                return Object.values(racks)
+                  .filter((rack) => rack.service === updateData.service)
+                  .map((rack) => (
+                    <option key={rack.id} value={rack.id}>
+                      {rack.name}
+                    </option>
+                  ));
+              })()}
+          </select>
+
+          <button onClick={handleUpdateServer} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+            Submit
+          </button>
+        </div>
+      )}
 
       <RackGridUser roomData={roomData} />
     </div>

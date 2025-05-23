@@ -38,15 +38,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           const result = await response.json();
           setError(result.message || 'Login failed.');
         } else {
-          const session = await response.json();
-          console.log('✅ Session:', session); // 🔍 Log the session
-          sessionStorage.setItem('session', JSON.stringify(session));
-
-          // Optionally store session info
-          // localStorage.setItem('token', session.token);
-
-          // 🔁 Redirect to /main
-          navigate('/datacenters');
+          navigate('/dashboard', { replace: true });
         }
       } catch (err) {
         console.error('❌ Network error:', err);

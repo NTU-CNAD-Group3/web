@@ -175,7 +175,6 @@ export default function RoomDetail() {
   return (
     <div className="space-y-4 p-6">
       <h1 className="text-2xl font-bold">Room: {roomData.name}</h1>
-      <p>Room ID: {roomData.id}</p>
       <p>Total Racks: {roomData.maxRack}</p>
       <p>Racks with Data: {roomData.hasRack}</p>
 

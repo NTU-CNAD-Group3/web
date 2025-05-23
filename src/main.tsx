@@ -131,10 +131,10 @@ const AnimatedRoutes = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/import" element={<Import />} />
+          <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
+          <Route path="/room/:fabId/:fabName/:roomId" element={<RoomDetailUser />} />
+          <Route path="/user-datacenter" element={<UserDataCenter />} />
         </Route>
-        <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
-        <Route path="/room/:fabId/:fabName/:roomId" element={<RoomDetailUser />} />
-        <Route path="/user-datacenter" element={<UserDataCenter />} />
       </Routes>
     </AnimatePresence>
   );

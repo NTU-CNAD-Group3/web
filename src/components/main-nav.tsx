@@ -14,11 +14,11 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
       <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
         Dashboard
       </Link>
-      <Link to="/overview" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Overview
+      <Link to="/user-datacenter" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        user
       </Link>
       <Link to="/datacenters" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Operation
+        admin
       </Link>
       <Link to="/search" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
         Search
