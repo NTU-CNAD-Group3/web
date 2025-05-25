@@ -14,7 +14,6 @@ import ChangePasswordPage from './routes/change-password';
 import Signup from '@/routes/signup';
 import ForgetPasswordConfirm from '@/routes/forget-password-confirm';
 import ChangePasswordConfirm from '@/routes/change-password-confirm';
-import LoginStat from '@/routes/login-stat';
 import Layout from '@/layout';
 
 import DataCenters from '@/routes/datacenters/page';
@@ -105,14 +104,6 @@ const AnimatedRoutes = () => {
             element={
               <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }}>
                 <ChangePasswordConfirm />
-              </motion.div>
-            }
-          />
-          <Route
-            path="main"
-            element={
-              <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }}>
-                <LoginStat />
               </motion.div>
             }
           />
