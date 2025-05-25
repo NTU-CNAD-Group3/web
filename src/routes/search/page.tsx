@@ -28,6 +28,25 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // 修改 dcMapping 相關程式，使用 string 作為 key
+  const [dcMapping, setDcMapping] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function loadDC() {
+      try {
+        const dc = await api.getAllDC();
+        const mapping: Record<string, string> = {};
+        Object.entries(dc).forEach(([key, value]) => {
+          mapping[key] = value.name; // 不轉型，直接保存 key
+        });
+        setDcMapping(mapping);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadDC();
+  }, [api]);
+
   const performSearch = useCallback(
     async (kw: string, type: string, page: number, size: number) => {
       if (!kw.trim()) return;
@@ -138,7 +157,8 @@ export default function SearchPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Link to={`/overview?dc=${srv.fabid}&room=${srv.roomid}&rack=${srv.rackid}`}>
+                          {/* 修改連結，使用 'dc' + srv.fabid 作為 key */}
+                          <Link to={`/room/${'dc' + srv.fabid}/${dcMapping['dc' + srv.fabid] || 'unknown'}/room${srv.roomid}`}>
                             <Button variant="outline" size="sm">
                               View Rack
                             </Button>
