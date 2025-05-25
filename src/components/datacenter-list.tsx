@@ -40,8 +40,6 @@ export function DataCenterList() {
   const { toast } = useToast();
 
   const fetchDataCenters = async () => {
-    console.log('Session:', sessionStorage.getItem('session'));
-
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/gateway/backend/allDC`, {
         method: 'GET',
@@ -110,6 +108,14 @@ export function DataCenterList() {
         }
         throw new Error(`Delete failed: ${response.status}`);
       }
+      if (response.status === 403) {
+        toast({
+          title: 'Forbidden',
+          description: 'You do not have the authority.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       toast({
         title: 'Success',
@@ -176,6 +182,15 @@ export function DataCenterList() {
         body: JSON.stringify(requestBody),
       });
 
+      if (response.status === 403) {
+        toast({
+          title: 'Forbidden',
+          description: 'You do not have the authority to create a room in this data center.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`Create room failed: ${response.status}`);
       }
@@ -226,6 +241,15 @@ export function DataCenterList() {
         }),
       });
 
+      if (response.status === 403) {
+        toast({
+          title: 'Forbidden',
+          description: 'You do not have the authority to update this data center.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`Update failed with status: ${response.status}`);
       }
@@ -269,6 +293,14 @@ export function DataCenterList() {
 
       if (!response.ok) {
         throw new Error(`Delete failed: ${response.status}`);
+      }
+      if (response.status === 403) {
+        toast({
+          title: 'Forbidden',
+          description: 'You do not have the authority to delete this room.',
+          variant: 'destructive',
+        });
+        return;
       }
 
       toast({

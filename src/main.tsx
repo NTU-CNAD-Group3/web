@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@/provider/theme-provider';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster } from './components/external-ui/toaster';
 
 import ConfirmEmail from '@/routes/confirm-email';
 import ErrorPage from '@/error-page';
@@ -147,6 +148,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Router>
           <AnimatedRoutes />
         </Router>
+        <Toaster />
       </ApiProvider>
     </ThemeProvider>
   </React.StrictMode>,
