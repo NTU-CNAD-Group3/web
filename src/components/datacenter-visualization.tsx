@@ -74,12 +74,12 @@ export function DatacenterVisualization() {
   const rooms = useMemo(() => {
     if (!selectedDC) return [];
     const roomMap = (dcMap[selectedDC]?.rooms as Record<string, RoomInfo>) || {};
-    return Object.entries(roomMap).map(([roomId, raw]) => {
+    return Object.entries(roomMap).map(([roomKey, raw]) => {
       const r = raw as RoomInfo;
       return {
-        roomId: Number(roomId),
+        roomId: roomKey, // 改為直接使用 roomKey (字串)
         info: {
-          id: r.id,
+          id: roomKey, // 改為直接使用 roomKey (字串)
           name: r.name,
           height: r.height,
           maxRack: r.maxRack,
@@ -205,7 +205,8 @@ export function DatacenterVisualization() {
 
                   {/* 管理按钮 */}
                   <div className="mt-2 flex justify-end">
-                    <Link to={`/overview?dc=${selectedDC}&room=${roomId}&rack=${rack.id}`}>
+                    {/* 修改 Manage Rack 按钮連結部分，改用 info.id */}
+                    <Link to={`/room/${dcMap[selectedDC].name}/${info.id}`}>
                       <Button size="sm" variant="outline">
                         Manage Rack
                       </Button>
