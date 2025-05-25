@@ -104,15 +104,15 @@ export function DataCenterList() {
             variant: 'destructive',
           });
 
-          if (response.status === 403) {
-            toast({
-              title: 'Forbidden',
-              description: 'You do not have the authority.',
-              variant: 'destructive',
-            });
-            return;
-          }
+          return;
+        }
 
+        if (response.status === 403) {
+          toast({
+            title: 'Forbidden',
+            description: 'You do not have the authority.',
+            variant: 'destructive',
+          });
           return;
         }
         throw new Error(`Delete failed: ${response.status}`);

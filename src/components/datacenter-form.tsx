@@ -38,6 +38,15 @@ export function DataCenterForm() {
         body: JSON.stringify({ name: data.name }),
       });
 
+      if (res.status === 403) {
+        toast({
+          title: 'Permission Denied',
+          description: 'You do not have permission to create a data center.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (!res.ok) {
         const result = await res.json();
         throw new Error(result.message || 'Failed to create data center');
