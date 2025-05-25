@@ -104,17 +104,18 @@ export function DataCenterList() {
             variant: 'destructive',
           });
 
+          if (response.status === 403) {
+            toast({
+              title: 'Forbidden',
+              description: 'You do not have the authority.',
+              variant: 'destructive',
+            });
+            return;
+          }
+
           return;
         }
         throw new Error(`Delete failed: ${response.status}`);
-      }
-      if (response.status === 403) {
-        toast({
-          title: 'Forbidden',
-          description: 'You do not have the authority.',
-          variant: 'destructive',
-        });
-        return;
       }
 
       toast({
@@ -291,9 +292,6 @@ export function DataCenterList() {
         body: JSON.stringify({ fabName: dcname, roomId: roomIdNm }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Delete failed: ${response.status}`);
-      }
       if (response.status === 403) {
         toast({
           title: 'Forbidden',
@@ -301,6 +299,10 @@ export function DataCenterList() {
           variant: 'destructive',
         });
         return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
       }
 
       toast({

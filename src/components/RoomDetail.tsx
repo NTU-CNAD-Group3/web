@@ -78,11 +78,6 @@ export default function RoomDetail() {
       });
 
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to delete rack');
-      }
-
       if (response.status === 403) {
         toast({
           title: 'Permission Denied',
@@ -90,6 +85,10 @@ export default function RoomDetail() {
           variant: 'destructive',
         });
         return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete rack');
       }
 
       toast({
