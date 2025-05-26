@@ -24,7 +24,7 @@ import Dashboard from '@/routes/dashboard/page';
 import Import from '@/routes/import/page';
 import BLayout from '@/layout-b';
 import RoomDetail from '@/components/RoomDetail';
-import { UserDataCenter } from '@/components/user-datacenter';
+import UserDataPage from '@/routes/userData/page';
 import RoomDetailUser from './components/RoomDetailUser';
 import './index.css';
 
@@ -125,7 +125,7 @@ const AnimatedRoutes = () => {
           <Route path="/import" element={<Import />} />
           <Route path="/room/:fabName/:roomId" element={<RoomDetail />} />
           <Route path="/room/:fabId/:fabName/:roomId" element={<RoomDetailUser />} />
-          <Route path="/user-datacenter" element={<UserDataCenter />} />
+          <Route path="/user-datacenter" element={<UserDataPage />} />
         </Route>
       </Routes>
     </AnimatePresence>
