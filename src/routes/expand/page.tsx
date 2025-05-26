@@ -45,6 +45,9 @@ export default function ExpandPage() {
   const [loadingPools, setLoadingPools] = useState(true);
   const [loadingUsedIPs, setLoadingUsedIPs] = useState(false);
 
+  // 新增：表單錯誤訊息狀態
+  const [formError, setFormError] = useState<string | null>(null);
+
   // 表单状态
   const ipPoolForm = useForm<CreateIpPoolData>({
     resolver: zodResolver(createIpPoolSchema),
@@ -117,16 +120,22 @@ export default function ExpandPage() {
   };
 
   const onSubmitIpPool = async (data: CreateIpPoolData) => {
+    // 清除先前錯誤訊息
+    setFormError(null);
     try {
       await api.createIpPool({ service: data.service, cidrBlock: data.cidrBlock });
+      // 成功後也清除錯誤訊息
+      setFormError(null);
       toast({ title: 'Success', description: 'IP pool created' });
       ipPoolForm.reset();
       // 重新拉 Pools 列表
       const pools = await api.getAllIpPools();
       setIpPools(pools);
       setAvailableServices((prev) => Array.from(new Set([...prev, data.service])));
-    } catch (e) {
-      toast({ title: 'Error', description: String(e), variant: 'destructive' });
+    } catch (error: unknown) {
+      // 將 unknown 轉為 Error，再取 message
+      const msg = error instanceof Error ? error.message : String(error);
+      setFormError(msg);
     }
   };
 
@@ -296,6 +305,8 @@ export default function ExpandPage() {
                     <Button type="submit" disabled={globalLoading}>
                       {globalLoading ? 'Creating...' : 'Create IP Pool'}
                     </Button>
+                    {/* 新增：在按鈕下方顯示錯誤訊息 */}
+                    {formError && <p className="mt-2 text-sm text-red-600">{formError}</p>}
                   </form>
                 </Form>
               </CardContent>

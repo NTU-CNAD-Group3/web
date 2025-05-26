@@ -156,8 +156,15 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ service: data.service, cidrBlock: data.cidrBlock }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const body = (await res.json()) as { data: IpPool };
+    const body = await res.json();
+    if (!res.ok) {
+      let errorMsg = body.message || '';
+      if (body.stack) errorMsg += ` ${body.stack}`;
+      if (res.status === 503 && !body.message) {
+        errorMsg = 'IP Pool resources insufficient';
+      }
+      throw new Error(errorMsg || `HTTP ${res.status}`);
+    }
     return body.data;
   }
 
